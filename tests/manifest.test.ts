@@ -135,7 +135,7 @@ describe("real repository manifests", () => {
     await walk(path.join(repoRoot, "plugin"));
   });
 
-  it("the real repository has no stray SKILL.md files yet", async () => {
+  it("the only SKILL.md files are the two launch skills", async () => {
     const skillMdPaths: string[] = [];
     async function walk(dir: string): Promise<void> {
       const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -149,7 +149,10 @@ describe("real repository manifests", () => {
       }
     }
     await walk(path.join(repoRoot, "plugin"));
-    expect(skillMdPaths).toEqual([]);
+    expect(skillMdPaths.map((p) => path.relative(repoRoot, p)).sort()).toEqual([
+      path.join("plugin", "skills", "create-skill", "SKILL.md"),
+      path.join("plugin", "skills", "using-parcel-mcp", "SKILL.md"),
+    ]);
   });
 
   it("accepts a synthetic skill at plugin/skills/<slug>/SKILL.md", async () => {

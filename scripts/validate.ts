@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import { validateSkillDir } from "./read-skill.js";
 
 export interface Finding {
   path: string;
@@ -507,12 +508,40 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
   await walk(pluginRoot, []);
 }
 
+// Every plugin/skills/<slug> directory must satisfy the portable skill format.
+async function validateSkills(
+  root: string,
+  findings: Finding[],
+): Promise<void> {
+  const skillsRoot = path.join(root, "plugin", "skills");
+  let entries: string[];
+  try {
+    entries = await fs.readdir(skillsRoot);
+  } catch {
+    return;
+  }
+  for (const entry of entries.sort()) {
+    const skillDir = path.join(skillsRoot, entry);
+    const stat = await fs.lstat(skillDir);
+    if (!stat.isDirectory()) {
+      continue;
+    }
+    for (const finding of await validateSkillDir(skillDir)) {
+      findings.push({
+        path: `plugin/skills/${finding.path}`,
+        rule: finding.rule,
+      });
+    }
+  }
+}
+
 export async function validateRepository(
   root: string,
 ): Promise<ValidationReport> {
   const findings: Finding[] = [];
 
   await validateMarketplace(root, findings);
+  await validateSkills(root, findings);
   await validatePluginManifest(root, findings);
   await validateMcpManifest(root, findings);
   await walkPlugin(root, findings);
