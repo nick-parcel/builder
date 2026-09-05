@@ -336,6 +336,33 @@ describe("invalid fixtures", () => {
   });
 });
 
+// Mirrors the archive step in .github/workflows/publish-plugin-zip.yml.
+describe("plugin archive layout", () => {
+  it("zips the contents of plugin/ with the manifest at the archive root", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "parcel-plugin-zip-"));
+    const archive = path.join(dir, "builder-plugin.zip");
+    await execFileAsync("zip", ["-qr", archive, ".", "-x", ".DS_Store"], {
+      cwd: path.join(repoRoot, "plugin"),
+    });
+    const { stdout } = await execFileAsync("unzip", ["-Z1", archive]);
+    const entries = stdout
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.endsWith("/"));
+
+    expect(entries).toContain(".claude-plugin/plugin.json");
+    expect(entries).toContain(".mcp.json");
+    expect(entries).toContain("skills/using-parcel-mcp/SKILL.md");
+    expect(entries).toContain("skills/create-skill/SKILL.md");
+    for (const entry of entries) {
+      expect(entry.startsWith("/")).toBe(false);
+      expect(entry.split("/")).not.toContain("..");
+      expect(entry.startsWith("plugin/")).toBe(false);
+    }
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+});
+
 describe("claude plugin validate --strict", () => {
   it.skipIf(!claudeAvailable)("passes for ./plugin", async () => {
     await expect(
