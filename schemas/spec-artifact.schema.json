@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nick-parcel/parcel-skills/schemas/spec-artifact.schema.json",
+  "title": "SpecSkillArtifactV1",
+  "description": "One published Parcel skill bundle for a single release tag.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "repository",
+    "commit",
+    "releaseTag",
+    "pluginVersion",
+    "sourcePath",
+    "skill"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "repository": { "const": "nick-parcel/parcel-skills" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "releaseTag": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "pluginVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^plugin/skills/[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "skill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slug",
+        "version",
+        "name",
+        "description",
+        "compatibility",
+        "visibility",
+        "instructions",
+        "skillMd",
+        "files",
+        "sha256",
+        "bytes"
+      ],
+      "properties": {
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+        },
+        "name": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "compatibility": { "type": ["string", "null"], "maxLength": 500 },
+        "visibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "claudePlugin",
+            "parcelExplore",
+            "parcelInstallable",
+            "parcelRuntime"
+          ],
+          "properties": {
+            "claudePlugin": { "type": "boolean" },
+            "parcelExplore": { "type": "boolean" },
+            "parcelInstallable": { "type": "boolean" },
+            "parcelRuntime": { "type": "boolean" }
+          }
+        },
+        "instructions": { "type": "string" },
+        "skillMd": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["content", "sha256", "bytes"],
+          "properties": {
+            "content": { "type": "string" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "bytes": { "type": "integer", "minimum": 0, "maximum": 102400 }
+          }
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "mediaType", "content", "sha256", "bytes"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1, "maxLength": 240 },
+              "mediaType": {
+                "enum": ["text/markdown", "text/plain", "application/json"]
+              },
+              "content": { "type": "string" },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "bytes": { "type": "integer", "minimum": 0, "maximum": 102400 }
+            }
+          }
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bytes": { "type": "integer", "minimum": 0, "maximum": 512000 }
+      }
+    }
+  }
+}

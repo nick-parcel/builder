@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "validate": "tsx scripts/validate.ts",
-    "check:generated": "if [ -f scripts/check-generated.ts ]; then tsx scripts/check-generated.ts; else echo 'no check:generated script yet'; fi",
-    "build:spec": "if [ -f scripts/build-spec.ts ]; then tsx scripts/build-spec.ts; else echo 'no build:spec script yet'; fi"
+    "check:generated": "tsx scripts/check-generated.ts",
+    "build:spec": "tsx scripts/build-spec-artifacts.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

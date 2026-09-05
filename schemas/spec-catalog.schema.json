@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nick-parcel/parcel-skills/schemas/spec-catalog.schema.json",
+  "title": "SpecSkillCatalogV1",
+  "description": "Catalog of published Parcel skill artifacts for a single release tag.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "repository",
+    "commit",
+    "releaseTag",
+    "pluginVersion",
+    "skills"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "repository": { "const": "nick-parcel/parcel-skills" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "releaseTag": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "pluginVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "version", "artifactPath", "sha256", "visibility"],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+          },
+          "artifactPath": {
+            "type": "string",
+            "pattern": "^skills/[a-z0-9]+(-[a-z0-9]+)*\\.[0-9a-f]{64}\\.json$"
+          },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "visibility": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "claudePlugin",
+              "parcelExplore",
+              "parcelInstallable",
+              "parcelRuntime"
+            ],
+            "properties": {
+              "claudePlugin": { "type": "boolean" },
+              "parcelExplore": { "type": "boolean" },
+              "parcelInstallable": { "type": "boolean" },
+              "parcelRuntime": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
