@@ -276,6 +276,22 @@ describe("invalid fixtures", () => {
     expect(rules).toContain("path_forbidden_extension");
   });
 
+  it("reports a symlinked plugin root instead of skipping the content walk", async () => {
+    const dir = await copyRepoToTempDir("plugin-root-symlink");
+    await fs.rm(path.join(dir, "plugin"), { recursive: true, force: true });
+    await fs.mkdir(path.join(dir, "elsewhere"), { recursive: true });
+    await fs.symlink(path.join(dir, "elsewhere"), path.join(dir, "plugin"));
+    const rules = await findingRules(dir);
+    expect(rules).toContain("plugin_root_invalid");
+  });
+
+  it("reports a missing plugin root", async () => {
+    const dir = await copyRepoToTempDir("plugin-root-missing");
+    await fs.rm(path.join(dir, "plugin"), { recursive: true, force: true });
+    const rules = await findingRules(dir);
+    expect(rules).toContain("plugin_root_missing");
+  });
+
   it("rejects a marketplace source pointing at a directory that does not exist", async () => {
     const rules = await findingRules(
       path.join(fixturesRoot, "marketplace-source-missing"),
