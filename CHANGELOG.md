@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-05
+
+### Fixed
+
+- Skill versions now track the plugin version (0.2.0 shipped changed skill content at version 0.1.0); the validator enforces it.
+
 ## [0.2.0] - 2026-09-05
 
 ### Changed
