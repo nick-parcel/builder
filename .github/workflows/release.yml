@@ -97,7 +97,7 @@ jobs:
 
       # Runs after the build so scanner output cannot dirty the tree the builder checks.
       - name: Secret scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
