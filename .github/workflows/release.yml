@@ -67,10 +67,24 @@ jobs:
             echo "claude CLI not installed on this runner, relying on pnpm validate and pinned schema tests"
           fi
 
-      - name: Secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Plugin content guard
+        run: |
+          if [ -d plugin ]; then
+            symlinks=$(find plugin -type l)
+            if [ -n "$symlinks" ]; then
+              echo "Symlinks are not allowed under plugin/:"
+              echo "$symlinks"
+              exit 1
+            fi
+            executables=$(find plugin -type f -perm -u+x)
+            if [ -n "$executables" ]; then
+              echo "Executable files are not allowed under plugin/:"
+              echo "$executables"
+              exit 1
+            fi
+          else
+            echo "plugin/ does not exist yet, skipping"
+          fi
 
       - name: Build and verify release artifacts
         run: |
@@ -80,6 +94,12 @@ jobs:
           pnpm check:generated
           pnpm build:spec
           sha256sum dist/spec/catalog.json dist/spec/skills/*.json dist/spec/SHA256SUMS
+
+      # Runs after the build so scanner output cannot dirty the tree the builder checks.
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write release notes
         run: |
