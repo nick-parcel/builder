@@ -52,7 +52,7 @@ describe("real repository manifests", () => {
     expect(report.ok).toBe(true);
   });
 
-  it("plugin identity is builder, version 0.2.1, license Apache-2.0", async () => {
+  it("plugin identity is builder, version 0.2.2, license Apache-2.0", async () => {
     const pluginJson = JSON.parse(
       await fs.readFile(
         path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
@@ -60,7 +60,7 @@ describe("real repository manifests", () => {
       ),
     );
     expect(pluginJson.name).toBe("builder");
-    expect(pluginJson.version).toBe("0.2.1");
+    expect(pluginJson.version).toBe("0.2.2");
     expect(pluginJson.license).toBe("Apache-2.0");
     expect(pluginJson.homepage).toBe("https://github.com/nick-parcel/builder");
     expect(pluginJson.repository).toBe(
@@ -95,7 +95,7 @@ describe("real repository manifests", () => {
     expect(marketplaceJson.name).toBe("builder");
     expect(marketplaceJson.plugins).toHaveLength(1);
     expect(marketplaceJson.plugins[0].name).toBe("builder");
-    expect(marketplaceJson.plugins[0].version).toBe("0.2.1");
+    expect(marketplaceJson.plugins[0].version).toBe("0.2.2");
     expect(marketplaceJson.plugins[0].source).toBe("./plugin");
     expect(typeof marketplaceJson.plugins[0].source).toBe("string");
   });

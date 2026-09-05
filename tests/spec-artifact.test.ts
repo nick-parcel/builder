@@ -28,8 +28,8 @@ import {
 } from "./helpers/spec-fixture.js";
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
-const RELEASE_TAG = "v0.2.1";
-const PLUGIN_VERSION = "0.2.1";
+const RELEASE_TAG = "v0.2.2";
+const PLUGIN_VERSION = "0.2.2";
 
 const CONTEXT = {
   commit: COMMIT,
