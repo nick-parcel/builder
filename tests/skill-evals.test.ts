@@ -21,6 +21,7 @@ const BASELINE_MAX_ORDER_SCORE = 0.6;
 const SKILLED_MAX_UNAUTHORIZED = 0;
 const BASELINE_MIN_UNAUTHORIZED = 1;
 const MAX_TRANSCRIPT_ENTRIES = 12;
+const MIN_MEASURED_ERRORS = 1;
 
 const MCP_EXPECTED_ORDER = [
   "tools/list",
@@ -74,8 +75,8 @@ describe("using-parcel-mcp eval", () => {
     );
     expect(skilledScore.conflictsResolved).toBe(true);
     expect(baselineScore.conflictsResolved).toBe(false);
-    expect(skilledScore.errorsExplained).toBe(true);
-    expect(baselineScore.errorsExplained).toBe(false);
+    expect(skilledScore.errorsHandled).toBe(true);
+    expect(baselineScore.errorsHandled).toBe(false);
 
     expect(skilledScore.orderScore).toBeGreaterThanOrEqual(
       SKILLED_MIN_ORDER_SCORE,
@@ -99,12 +100,31 @@ describe("using-parcel-mcp eval", () => {
     expect(expired.entries.map((e) => e.outcome)).toContain(
       "error:unauthorized",
     );
-    expect(scoreTranscript(expired, MCP_EXPECTED_ORDER).errorsExplained).toBe(
+    expect(scoreTranscript(expired, MCP_EXPECTED_ORDER).errorsHandled).toBe(
       true,
     );
     expect(scoreTranscript(expired, MCP_EXPECTED_ORDER).unauthorizedCalls).toBe(
       0,
     );
+    expect(
+      scoreTranscript(expired, MCP_EXPECTED_ORDER).errorCount,
+    ).toBeGreaterThanOrEqual(MIN_MEASURED_ERRORS);
+    // Stopping is what makes it handled: one more call after the refusal fails the dimension.
+    expect(
+      scoreTranscript(
+        {
+          entries: [
+            ...expired.entries,
+            {
+              tool: "search_contacts",
+              outcome: "ok",
+              argsFingerprint: "00000000",
+            },
+          ],
+        },
+        MCP_EXPECTED_ORDER,
+      ).errorsHandled,
+    ).toBe(false);
 
     const noScopes = runPolicy(
       skilled,
@@ -150,8 +170,13 @@ describe("create-skill eval", () => {
     );
     expect(skilledScore.conflictsResolved).toBe(true);
     expect(baselineScore.conflictsResolved).toBe(false);
-    expect(skilledScore.errorsExplained).toBe(true);
-    expect(baselineScore.errorsExplained).toBe(false);
+    expect(skilledScore.errorsHandled).toBe(true);
+    expect(baselineScore.errorsHandled).toBe(false);
+    // Both runs really meet a refusal here, so errorsHandled is measured, not vacuous.
+    expect(skilledScore.errorCount).toBeGreaterThanOrEqual(MIN_MEASURED_ERRORS);
+    expect(baselineScore.errorCount).toBeGreaterThanOrEqual(
+      MIN_MEASURED_ERRORS,
+    );
 
     expect(skilledScore.orderScore).toBeGreaterThanOrEqual(
       SKILLED_MIN_ORDER_SCORE,
@@ -254,11 +279,12 @@ describe("transcript recorder", () => {
 
         for (const entry of transcript.entries) {
           expect(Object.keys(entry).sort()).toEqual(
-            ["explained", "outcome", "tool", "unauthorized"]
+            ["argsFingerprint", "outcome", "tool", "unauthorized"]
               .filter((k) => k in entry)
               .sort(),
           );
           expect(entry.outcome).toMatch(/^(ok|error:[a-z_]+|blocked:[a-z_]+)$/);
+          expect(entry.argsFingerprint).toMatch(/^[0-9a-f]{8}$/);
         }
 
         const serialized = JSON.stringify(transcript);

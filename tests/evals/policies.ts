@@ -1,10 +1,11 @@
+import { createHash } from "node:crypto";
 import type { MockServer } from "./mock-mcp.js";
 
 export interface TranscriptEntry {
   tool: string;
   outcome: string;
+  argsFingerprint: string;
   unauthorized?: string;
-  explained?: boolean;
 }
 
 export interface Transcript {
@@ -13,11 +14,10 @@ export interface Transcript {
 
 export interface PolicyContext {
   server: MockServer;
-  // Records only the tool name and a normalized outcome code, never arguments or content.
+  // Records the tool name, a normalized outcome code, and a one-way digest of the arguments.
   call(
     tool: string,
     args?: Record<string, unknown>,
-    options?: { explainErrors?: boolean },
   ): { outcome: string; response: Record<string, unknown> };
 }
 
@@ -50,14 +50,15 @@ export function runPolicy(policy: Policy, server: MockServer): Transcript {
   const entries: TranscriptEntry[] = [];
   const ctx: PolicyContext = {
     server,
-    call(tool, args = {}, options = {}) {
+    call(tool, args = {}) {
       const result = server.call(tool, args);
-      const entry: TranscriptEntry = { tool, outcome: result.outcome };
+      const entry: TranscriptEntry = {
+        tool,
+        outcome: result.outcome,
+        argsFingerprint: fingerprint(args),
+      };
       if (result.unauthorized) {
         entry.unauthorized = result.unauthorized;
-      }
-      if (result.outcome.startsWith("error:")) {
-        entry.explained = options.explainErrors === true;
       }
       entries.push(entry);
       return { outcome: result.outcome, response: result.response };
@@ -140,7 +141,7 @@ export function mcpPolicies(skillBody: string): {
 
       for (const step of steps) {
         if (step === "tools/list") {
-          const listed = ctx.call("tools/list", {}, { explainErrors: true });
+          const listed = ctx.call("tools/list", {});
           if (listed.outcome !== "ok") {
             return;
           }
@@ -154,11 +155,7 @@ export function mcpPolicies(skillBody: string): {
           continue;
         }
         if (step === "search_fields") {
-          const found = ctx.call(
-            "search_fields",
-            { object: "contacts" },
-            { explainErrors: true },
-          );
+          const found = ctx.call("search_fields", { object: "contacts" });
           const fields = (resultOf(found.response).fields ?? []) as Array<{
             key: string;
           }>;
@@ -169,14 +166,10 @@ export function mcpPolicies(skillBody: string): {
           if (!field) {
             continue;
           }
-          ctx.call(
-            "search_contacts",
-            { filter: { [field]: "software" } },
-            { explainErrors: true },
-          );
+          ctx.call("search_contacts", { filter: { [field]: "software" } });
           continue;
         }
-        ctx.call(step, {}, { explainErrors: true });
+        ctx.call(step, {});
       }
     },
   };
@@ -234,7 +227,7 @@ export function authoringPolicies(skillBody: string): {
   const skilled: Policy = {
     name: "skilled",
     run(ctx) {
-      const listed = ctx.call("tools/list", {}, { explainErrors: true });
+      const listed = ctx.call("tools/list", {});
       if (listed.outcome !== "ok") {
         return;
       }
@@ -253,15 +246,15 @@ export function authoringPolicies(skillBody: string): {
           continue;
         }
         if (step === "find_skill") {
-          ctx.call("find_skill", { query: "sample" }, { explainErrors: true });
+          ctx.call("find_skill", { query: "sample" });
           continue;
         }
         if (step === "create_skill") {
-          const created = ctx.call(
-            "create_skill",
-            { audience, bundle: VALID_BUNDLE, idempotencyKey: "<unique-key>" },
-            { explainErrors: true },
-          );
+          const created = ctx.call("create_skill", {
+            audience,
+            bundle: VALID_BUNDLE,
+            idempotencyKey: "<unique-key>",
+          });
           const result = resultOf(created.response);
           skillId = result.skillId as string | undefined;
           draftVersion = (result.draftVersion as number | undefined) ?? 0;
@@ -271,11 +264,9 @@ export function authoringPolicies(skillBody: string): {
           if (!skillId) {
             continue;
           }
-          const read = ctx.call(
-            "get_skill",
-            { locator: { source: "custom", skillId, view: "draft" } },
-            { explainErrors: true },
-          );
+          const read = ctx.call("get_skill", {
+            locator: { source: "custom", skillId, view: "draft" },
+          });
           draftVersion =
             (resultOf(read.response).draftVersion as number | undefined) ??
             draftVersion;
@@ -285,36 +276,26 @@ export function authoringPolicies(skillBody: string): {
           if (!skillId) {
             continue;
           }
-          const updated = ctx.call(
-            "update_skill",
-            {
+          const updated = ctx.call("update_skill", {
+            skillId,
+            expectedDraftVersion: draftVersion,
+            bundle: VALID_BUNDLE,
+            idempotencyKey: "<unique-key>",
+          });
+          if (updated.outcome === "error:revision_conflict") {
+            // Re-read the draft before reapplying; never resend the old body against a new version.
+            const reread = ctx.call("get_skill", {
+              locator: { source: "custom", skillId, view: "draft" },
+            });
+            draftVersion =
+              (resultOf(reread.response).draftVersion as number | undefined) ??
+              draftVersion;
+            const retried = ctx.call("update_skill", {
               skillId,
               expectedDraftVersion: draftVersion,
               bundle: VALID_BUNDLE,
               idempotencyKey: "<unique-key>",
-            },
-            { explainErrors: true },
-          );
-          if (updated.outcome === "error:revision_conflict") {
-            // Re-read the draft before reapplying; never resend the old body against a new version.
-            const reread = ctx.call(
-              "get_skill",
-              { locator: { source: "custom", skillId, view: "draft" } },
-              { explainErrors: true },
-            );
-            draftVersion =
-              (resultOf(reread.response).draftVersion as number | undefined) ??
-              draftVersion;
-            const retried = ctx.call(
-              "update_skill",
-              {
-                skillId,
-                expectedDraftVersion: draftVersion,
-                bundle: VALID_BUNDLE,
-                idempotencyKey: "<unique-key>",
-              },
-              { explainErrors: true },
-            );
+            });
             draftVersion =
               (resultOf(retried.response).draftVersion as number | undefined) ??
               draftVersion;
@@ -329,19 +310,37 @@ export function authoringPolicies(skillBody: string): {
           if (!skillId || !ctx.server.requestApproval("publish_skill")) {
             continue;
           }
-          ctx.call(
-            "publish_skill",
-            {
-              skillId,
-              expectedDraftVersion: draftVersion,
-              idempotencyKey: "<unique-key>",
-            },
-            { explainErrors: true },
-          );
+          ctx.call("publish_skill", {
+            skillId,
+            expectedDraftVersion: draftVersion,
+            idempotencyKey: "<unique-key>",
+          });
         }
       }
     },
   };
 
   return { baseline, skilled };
+}
+
+// One-way digest so a repeated call is detectable without recording any argument value.
+function fingerprint(args: Record<string, unknown>): string {
+  return createHash("sha256")
+    .update(stableStringify(args))
+    .digest("hex")
+    .slice(0, 8);
+}
+
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+  if (typeof value === "object" && value !== null) {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
 }

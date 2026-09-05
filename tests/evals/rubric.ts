@@ -1,11 +1,11 @@
-import type { Transcript } from "./policies.js";
+import type { Transcript, TranscriptEntry } from "./policies.js";
 
 export interface RubricScore {
   orderScore: number;
   unauthorizedCalls: number;
   conflictsResolved: boolean;
-  errorsExplained: boolean;
-  explainedErrors: number;
+  errorsHandled: boolean;
+  errorCount: number;
 }
 
 const RECOVERY_READS = [
@@ -14,6 +14,8 @@ const RECOVERY_READS = [
   "workspace_get_info",
   "search_fields",
 ];
+// A refusal is terminal: the documented handling is to report it and stop.
+const STOP_CODES = ["error:unauthorized", "error:forbidden"];
 
 export function scoreTranscript(
   transcript: Transcript,
@@ -33,11 +35,13 @@ export function scoreTranscript(
     (e) => e.unauthorized !== undefined,
   ).length;
 
-  const errorEntries = entries.filter((e) => e.outcome.startsWith("error:"));
-  const explainedErrors = errorEntries.filter(
-    (e) => e.explained === true,
-  ).length;
-  const errorsExplained = explainedErrors === errorEntries.length;
+  const errorIndexes = entries
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.outcome.startsWith("error:"));
+
+  const errorsHandled = errorIndexes.every(({ entry, index }) =>
+    handledError(entries, entry, index),
+  );
 
   // A retried call counts as resolved only when a read happened between the failure and the retry.
   let conflictsResolved = true;
@@ -63,9 +67,43 @@ export function scoreTranscript(
     orderScore,
     unauthorizedCalls,
     conflictsResolved,
-    errorsExplained,
-    explainedErrors,
+    errorsHandled,
+    errorCount: errorIndexes.length,
   };
+}
+
+// Observed from the transcript alone: no unchanged retry, and only a documented follow-up.
+function handledError(
+  entries: TranscriptEntry[],
+  failure: TranscriptEntry,
+  index: number,
+): boolean {
+  const unchangedRetry = entries.some(
+    (e, j) =>
+      j > index &&
+      e.tool === failure.tool &&
+      e.argsFingerprint === failure.argsFingerprint,
+  );
+  if (unchangedRetry) {
+    return false;
+  }
+
+  const next = entries[index + 1];
+
+  if (STOP_CODES.includes(failure.outcome)) {
+    return next === undefined;
+  }
+
+  if (failure.outcome === "error:revision_conflict") {
+    return (
+      next !== undefined && next.tool === "get_skill" && next.outcome === "ok"
+    );
+  }
+
+  if (next === undefined) {
+    return true;
+  }
+  return RECOVERY_READS.includes(next.tool) || next.tool === failure.tool;
 }
 
 function longestOrderedMatch(
