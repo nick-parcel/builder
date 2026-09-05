@@ -24,6 +24,20 @@ async function copyToTempDir(fixtureName: string) {
   return dest;
 }
 
+async function copyRepoToTempDir(label: string) {
+  const dest = await fs.mkdtemp(
+    path.join(os.tmpdir(), `parcel-repo-${label}-`),
+  );
+  await fs.cp(repoRoot, dest, {
+    recursive: true,
+    verbatimSymlinks: true,
+    filter: (src) =>
+      !src.includes(`${path.sep}node_modules`) &&
+      !src.includes(`${path.sep}.git`),
+  });
+  return dest;
+}
+
 let claudeAvailable = true;
 try {
   execSync("command -v claude", { stdio: "ignore" });
@@ -121,7 +135,7 @@ describe("real repository manifests", () => {
     await walk(path.join(repoRoot, "plugin"));
   });
 
-  it("every SKILL.md under plugin/ sits at plugin/skills/<slug>/SKILL.md", async () => {
+  it("the real repository has no stray SKILL.md files yet", async () => {
     const skillMdPaths: string[] = [];
     async function walk(dir: string): Promise<void> {
       const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -130,23 +144,39 @@ describe("real repository manifests", () => {
         if (entry.isDirectory()) {
           await walk(full);
         } else if (entry.isFile() && entry.name === "SKILL.md") {
-          skillMdPaths.push(
-            path
-              .relative(path.join(repoRoot, "plugin"), full)
-              .split(path.sep)
-              .join("/"),
-          );
+          skillMdPaths.push(full);
         }
       }
     }
     await walk(path.join(repoRoot, "plugin"));
-    // No skills exist yet; Task 3's additions will be checked by this same assertion.
     expect(skillMdPaths).toEqual([]);
-    for (const skillMdPath of skillMdPaths) {
-      expect(skillMdPath).toMatch(
-        /^skills\/[a-z0-9]+(-[a-z0-9]+)*\/SKILL\.md$/,
-      );
-    }
+  });
+
+  it("accepts a synthetic skill at plugin/skills/<slug>/SKILL.md", async () => {
+    const dir = await copyRepoToTempDir("valid-skill");
+    const skillDir = path.join(dir, "plugin", "skills", "sample-skill");
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(skillDir, "SKILL.md"),
+      "---\nname: sample-skill\ndescription: Sample.\n---\n\nBody.\n",
+    );
+    const report = await validateRepository(dir);
+    const rules = report.findings.map((f: Finding) => f.rule);
+    expect(rules).not.toContain("skill_location");
+    expect(rules).not.toContain("skill_missing_skill_md");
+    expect(rules).not.toContain("plugin_manifest_dir_extra_entry");
+  });
+
+  it("rejects a synthetic skill with an invalid slug", async () => {
+    const dir = await copyRepoToTempDir("invalid-slug");
+    const skillDir = path.join(dir, "plugin", "skills", "Bad_Slug");
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(skillDir, "SKILL.md"),
+      "---\nname: Bad_Slug\ndescription: Sample.\n---\n\nBody.\n",
+    );
+    const rules = await findingRules(dir);
+    expect(rules).toContain("skill_location");
   });
 });
 
@@ -268,6 +298,14 @@ describe("invalid fixtures", () => {
     const rules = await findingRules(
       path.join(fixturesRoot, "manifest-dir-extra-entry"),
     );
+    expect(rules).toContain("plugin_manifest_dir_extra_entry");
+  });
+
+  it("reports skill_location for a SKILL.md placed inside plugin/.claude-plugin/", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "skill-inside-manifest-dir"),
+    );
+    expect(rules).toContain("skill_location");
     expect(rules).toContain("plugin_manifest_dir_extra_entry");
   });
 });

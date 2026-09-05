@@ -455,6 +455,10 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
         continue;
       }
 
+      if (name === "SKILL.md" && !isValidSkillLocation(entrySegments)) {
+        findings.push({ path: reportPath, rule: "skill_location" });
+      }
+
       if (segments.length === 0 && FORBIDDEN_PLUGIN_ENTRIES.has(name)) {
         findings.push({ path: reportPath, rule: "path_forbidden_entry" });
         continue;
@@ -488,10 +492,6 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
         if (entryStat.mode & 0o111) {
           findings.push({ path: reportPath, rule: "path_executable" });
           continue;
-        }
-
-        if (name === "SKILL.md" && !isValidSkillLocation(entrySegments)) {
-          findings.push({ path: reportPath, rule: "skill_location" });
         }
 
         const ext = path.extname(name).toLowerCase();
