@@ -520,12 +520,31 @@ async function validateSkills(
   } catch {
     return;
   }
+  const dirEntries: string[] = [];
   for (const entry of entries.sort()) {
     const skillDir = path.join(skillsRoot, entry);
     const stat = await fs.lstat(skillDir);
-    if (!stat.isDirectory()) {
-      continue;
+    if (stat.isDirectory()) {
+      dirEntries.push(entry);
     }
+  }
+  // Report case-folded directory collisions before per-dir checks, so a
+  // structural naming clash is not masked by an individual slug finding.
+  const folded = new Map<string, string>();
+  for (const entry of dirEntries) {
+    const fold = entry.toLowerCase();
+    const previous = folded.get(fold);
+    if (previous !== undefined) {
+      findings.push({
+        path: `plugin/skills/${previous} and ${entry}`,
+        rule: "skill_slug_case_collision",
+      });
+    } else {
+      folded.set(fold, entry);
+    }
+  }
+  for (const entry of dirEntries) {
+    const skillDir = path.join(skillsRoot, entry);
     for (const finding of await validateSkillDir(skillDir)) {
       findings.push({
         path: `plugin/skills/${finding.path}`,
