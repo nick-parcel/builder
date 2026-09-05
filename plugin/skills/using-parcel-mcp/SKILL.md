@@ -1,6 +1,6 @@
 ---
 name: using-parcel-mcp
-description: Use when working with Parcel through its remote MCP server, including connecting or reconnecting the OAuth grant, discovering which Parcel tools and scope groups are available, searching Parcel data, reading or writing workspace records, or explaining a scope, plan, or expired-grant refusal to the person you are helping.
+description: Use when someone says connect Parcel, what Parcel tools do I have, search Parcel for an account or contact, read or update a workspace record, or why did Parcel refuse that, including reconnecting an expired OAuth grant and reporting a scope or plan refusal honestly. Do not use for authoring, revising, or publishing a Parcel skill, use `/builder:create-skill` instead.
 license: Apache-2.0
 compatibility: Any MCP client that can connect to a remote HTTP MCP server and complete an OAuth authorization flow
 metadata:

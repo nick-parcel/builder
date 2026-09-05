@@ -1,6 +1,6 @@
 ---
 name: create-skill
-description: Use when someone wants to write, revise, or publish a Parcel skill through Parcel's MCP skill tools, including choosing a Personal or Workspace audience, drafting a portable SKILL.md bundle, recovering from a revision conflict, or deciding whether a draft is ready to publish.
+description: Use when someone says create a Parcel skill, draft or revise a skill bundle, publish this skill, pick a Personal or Workspace audience, or fix the revision conflict on a draft. Do not use for general Parcel data questions such as searching accounts or reading workspace records, use `/builder:using-parcel-mcp` instead. Do not use for connecting or reauthorizing the MCP grant, use `/builder:using-parcel-mcp` instead.
 license: Apache-2.0
 compatibility: Any MCP client connected to Parcel with the skills read and write scope groups granted
 metadata:
