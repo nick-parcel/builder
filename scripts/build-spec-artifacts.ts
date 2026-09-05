@@ -5,7 +5,7 @@ import path from "node:path";
 import { parseFrontmatter, readSkill } from "./read-skill.js";
 import { type Finding, validateRepository } from "./validate.js";
 
-export const SPEC_REPOSITORY = "nick-parcel/parcel-skills";
+export const SPEC_REPOSITORY = "nick-parcel/builder";
 
 // Parity with Parcel's SKILL_FORMAT_LIMITS so an imported bundle never exceeds them.
 export const SPEC_LIMITS = {

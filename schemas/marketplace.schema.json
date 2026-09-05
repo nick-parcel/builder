@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/nick-parcel/parcel-skills/schemas/marketplace.schema.json",
+  "$id": "https://github.com/nick-parcel/builder/schemas/marketplace.schema.json",
   "title": "Claude Code plugin marketplace manifest (marketplace.json)",
   "type": "object",
   "additionalProperties": false,

@@ -28,8 +28,8 @@ import {
 } from "./helpers/spec-fixture.js";
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
-const RELEASE_TAG = "v0.1.0";
-const PLUGIN_VERSION = "0.1.0";
+const RELEASE_TAG = "v0.2.0";
+const PLUGIN_VERSION = "0.2.0";
 
 const CONTEXT = {
   commit: COMMIT,
@@ -85,14 +85,14 @@ describe("spec artifact contract", () => {
 
   it("stamps schema version, repository, commit, tag, and plugin version", () => {
     expect(result.catalog.schemaVersion).toBe(1);
-    expect(result.catalog.repository).toBe("nick-parcel/parcel-skills");
+    expect(result.catalog.repository).toBe("nick-parcel/builder");
     expect(result.catalog.commit).toBe(COMMIT);
     expect(result.catalog.commit).toMatch(/^[0-9a-f]{40}$/);
     expect(result.catalog.releaseTag).toBe(RELEASE_TAG);
     expect(result.catalog.pluginVersion).toBe(PLUGIN_VERSION);
     for (const artifact of result.artifacts) {
       expect(artifact.schemaVersion).toBe(1);
-      expect(artifact.repository).toBe("nick-parcel/parcel-skills");
+      expect(artifact.repository).toBe("nick-parcel/builder");
       expect(artifact.commit).toBe(COMMIT);
       expect(artifact.releaseTag).toBe(RELEASE_TAG);
       expect(artifact.pluginVersion).toBe(PLUGIN_VERSION);
@@ -518,7 +518,7 @@ describe("builder refusals", () => {
 
   it("refuses a release tag that is not v plus the plugin version", async () => {
     const error = await expectBuildError(
-      buildFixture({ releaseTag: "v0.2.0" }),
+      buildFixture({ releaseTag: "v0.3.0" }),
     );
     expect(error.rule).toBe("release_tag_mismatch");
   });
@@ -819,7 +819,7 @@ describe("published JSON schemas", () => {
         Record<string, unknown>
       >;
       expect(properties.schemaVersion.const).toBe(1);
-      expect(properties.repository.const).toBe("nick-parcel/parcel-skills");
+      expect(properties.repository.const).toBe("nick-parcel/builder");
       expect(properties.commit.pattern).toBe("^[0-9a-f]{40}$");
       expect(properties.releaseTag.pattern).toBe("^v\\d+\\.\\d+\\.\\d+$");
       expect(properties.pluginVersion.pattern).toBe(semver);

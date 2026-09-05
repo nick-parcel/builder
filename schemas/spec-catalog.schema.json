@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/nick-parcel/parcel-skills/schemas/spec-catalog.schema.json",
+  "$id": "https://github.com/nick-parcel/builder/schemas/spec-catalog.schema.json",
   "title": "SpecSkillCatalogV1",
   "description": "Catalog of published Parcel skill artifacts for a single release tag.",
   "type": "object",
@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schemaVersion": { "const": 1 },
-    "repository": { "const": "nick-parcel/parcel-skills" },
+    "repository": { "const": "nick-parcel/builder" },
     "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "releaseTag": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
     "pluginVersion": {
