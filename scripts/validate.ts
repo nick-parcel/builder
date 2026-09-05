@@ -405,6 +405,20 @@ async function scanForSecrets(
   }
 }
 
+const SKILL_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+function isValidSkillLocation(segments: string[]): boolean {
+  if (segments.length !== 3) {
+    return false;
+  }
+  const [skillsDir, slug, fileName] = segments;
+  return (
+    skillsDir === "skills" &&
+    fileName === "SKILL.md" &&
+    SKILL_SLUG_PATTERN.test(slug)
+  );
+}
+
 async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
   const pluginRoot = path.join(root, "plugin");
   let stat: Awaited<ReturnType<typeof fs.lstat>>;
@@ -417,10 +431,23 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
     return;
   }
 
-  async function walk(dir: string, isTopLevel: boolean): Promise<void> {
+  async function walk(dir: string, segments: string[]): Promise<void> {
     const entries = await fs.readdir(dir);
+
+    if (
+      segments.length === 2 &&
+      segments[0] === "skills" &&
+      !entries.includes("SKILL.md")
+    ) {
+      findings.push({
+        path: toRelative(root, dir),
+        rule: "skill_missing_skill_md",
+      });
+    }
+
     for (const name of entries) {
       const fullPath = path.join(dir, name);
+      const entrySegments = [...segments, name];
       const reportPath = toRelative(root, fullPath);
 
       if (name.includes("..")) {
@@ -428,8 +455,20 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
         continue;
       }
 
-      if (isTopLevel && FORBIDDEN_PLUGIN_ENTRIES.has(name)) {
+      if (segments.length === 0 && FORBIDDEN_PLUGIN_ENTRIES.has(name)) {
         findings.push({ path: reportPath, rule: "path_forbidden_entry" });
+        continue;
+      }
+
+      if (
+        segments.length === 1 &&
+        segments[0] === ".claude-plugin" &&
+        name !== "plugin.json"
+      ) {
+        findings.push({
+          path: reportPath,
+          rule: "plugin_manifest_dir_extra_entry",
+        });
         continue;
       }
 
@@ -441,7 +480,7 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
       }
 
       if (entryStat.isDirectory()) {
-        await walk(fullPath, false);
+        await walk(fullPath, entrySegments);
         continue;
       }
 
@@ -450,6 +489,11 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
           findings.push({ path: reportPath, rule: "path_executable" });
           continue;
         }
+
+        if (name === "SKILL.md" && !isValidSkillLocation(entrySegments)) {
+          findings.push({ path: reportPath, rule: "skill_location" });
+        }
+
         const ext = path.extname(name).toLowerCase();
         if (!ALLOWED_EXTENSIONS.has(ext)) {
           findings.push({ path: reportPath, rule: "path_forbidden_extension" });
@@ -460,7 +504,7 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
     }
   }
 
-  await walk(pluginRoot, true);
+  await walk(pluginRoot, []);
 }
 
 export async function validateRepository(
