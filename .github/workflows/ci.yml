@@ -40,6 +40,14 @@ jobs:
       - name: Validate repository
         run: pnpm validate
 
+      - name: Reproducible artifacts
+        run: |
+          version=$(node -p "require('./plugin/.claude-plugin/plugin.json').version")
+          SOURCE_COMMIT="$(git rev-parse HEAD)" \
+          RELEASE_TAG="v${version}" \
+          PLUGIN_VERSION="${version}" \
+          pnpm check:generated
+
       - name: Claude plugin validate (if available)
         run: |
           if command -v claude >/dev/null 2>&1; then

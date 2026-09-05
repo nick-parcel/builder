@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify the tag commit is on main
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Tag commit $GITHUB_SHA is not contained in origin/main"
+            exit 1
+          fi
+
+      - name: Verify the tag matches the plugin version
+        run: |
+          version=$(node -p "require('./plugin/.claude-plugin/plugin.json').version")
+          if [ "$GITHUB_REF_NAME" != "v${version}" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match plugin version ${version}"
+            exit 1
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Validate repository
+        run: pnpm validate
+
+      - name: Claude plugin validate (if available)
+        run: |
+          if command -v claude >/dev/null 2>&1; then
+            claude plugin validate --strict ./plugin
+            claude plugin validate --strict .
+          else
+            echo "claude CLI not installed on this runner, relying on pnpm validate and pinned schema tests"
+          fi
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and verify release artifacts
+        run: |
+          export SOURCE_COMMIT="$GITHUB_SHA"
+          export RELEASE_TAG="$GITHUB_REF_NAME"
+          export PLUGIN_VERSION="${GITHUB_REF_NAME#v}"
+          pnpm check:generated
+          pnpm build:spec
+          sha256sum dist/spec/catalog.json dist/spec/skills/*.json dist/spec/SHA256SUMS
+
+      - name: Write release notes
+        run: |
+          {
+            echo "Commit: $GITHUB_SHA"
+            echo "Tag: $GITHUB_REF_NAME"
+            echo "Plugin version: ${GITHUB_REF_NAME#v}"
+            echo
+            echo '```'
+            cat dist/spec/SHA256SUMS
+            echo '```'
+          } > release-notes.md
+
+      - name: Create the GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            dist/spec/catalog.json \
+            dist/spec/skills/*.json \
+            dist/spec/SHA256SUMS
