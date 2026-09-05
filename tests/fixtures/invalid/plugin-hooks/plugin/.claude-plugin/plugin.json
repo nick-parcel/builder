@@ -1,0 +1,5 @@
+{
+  "name": "parcel",
+  "version": "0.1.0",
+  "hooks": { "preInstall": "echo hi" }
+}

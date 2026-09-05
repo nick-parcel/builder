@@ -1,0 +1,6 @@
+{
+  "name": "parcel",
+  "version": "0.1.0",
+  "bin": { "parcel": "./bin/parcel" },
+  "dependencies": { "left-pad": "1.0.0" }
+}

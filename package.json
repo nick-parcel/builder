@@ -12,7 +12,7 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "validate": "if [ -f scripts/validate.ts ]; then tsx scripts/validate.ts; else echo 'no validate script yet'; fi",
+    "validate": "tsx scripts/validate.ts",
     "check:generated": "if [ -f scripts/check-generated.ts ]; then tsx scripts/check-generated.ts; else echo 'no check:generated script yet'; fi",
     "build:spec": "if [ -f scripts/build-spec.ts ]; then tsx scripts/build-spec.ts; else echo 'no build:spec script yet'; fi"
   },

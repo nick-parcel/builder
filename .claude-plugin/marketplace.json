@@ -1,0 +1,20 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "parcel-skills",
+  "owner": { "name": "Parcel", "url": "https://www.parcelengineering.com" },
+  "description": "Connect an AI client to Parcel and use open Parcel skills.",
+  "plugins": [
+    {
+      "name": "parcel",
+      "source": "./plugin",
+      "description": "Connect an AI client to Parcel and use open Parcel skills.",
+      "version": "0.1.0",
+      "author": { "name": "Parcel" },
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/nick-parcel/parcel-skills",
+      "repository": "https://github.com/nick-parcel/parcel-skills",
+      "category": "productivity",
+      "strict": true
+    }
+  ]
+}
