@@ -75,3 +75,16 @@ tagged commit, with `SOURCE_COMMIT`, `RELEASE_TAG`, and `PLUGIN_VERSION` set
 to match the tag, rebuilds byte-identical files and verifies the working tree
 is clean afterward. Parcel imports a tagged release of this repository
 through a checked-in sync tool; it never fetches GitHub at runtime.
+
+## Verification status
+
+Release 0.1.0 was certified by a clean-room install, uninstall, and reinstall
+of the plugin from a fresh client profile; by `claude plugin validate
+--strict` against the plugin and the marketplace; by deterministic artifact
+verification (`pnpm check:generated`) and a byte-for-byte rebuild of the
+tagged commit; and by this repository's automated format and eval tests.
+
+The live OAuth authorization flow and a live skill-lifecycle exercise
+against production Parcel MCP are not part of this repository's CI. The
+maintainer performs that exercise on the Parcel side as a pre-merge check
+before each import of a tagged release.
