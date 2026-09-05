@@ -1,10 +1,10 @@
 {
-  "name": "parcel",
-  "version": "0.1.0",
-  "description": "Connect an AI client to Parcel and use open Parcel skills.",
+  "name": "builder",
+  "version": "0.2.0",
+  "description": "Parcel's builder plugin: connect an AI client to Parcel and use open Parcel skills.",
   "author": { "name": "Parcel" },
   "license": "Apache-2.0",
-  "homepage": "https://github.com/nick-parcel/parcel-skills",
-  "repository": "https://github.com/nick-parcel/parcel-skills",
-  "keywords": ["parcel", "mcp", "skills"]
+  "homepage": "https://github.com/nick-parcel/builder",
+  "repository": "https://github.com/nick-parcel/builder",
+  "keywords": ["parcel", "mcp", "skills", "builder"]
 }
