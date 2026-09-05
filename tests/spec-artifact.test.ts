@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { ValidateFunction } from "ajv";
+import { Ajv2020 } from "ajv/dist/2020.js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   SpecBuildError,
@@ -871,5 +873,213 @@ describe("published JSON schemas", () => {
     >;
     expect(entryProperties.sha256.pattern).toBe("^[0-9a-f]{64}$");
     expect(entryProperties.version.pattern).toBe(semver);
+  });
+});
+
+const REFERENCE_SLUG = "with-references";
+const REFERENCE_MD = "# Reference\n\nA supporting reference file.\n";
+const VALUES_JSON = '{\n  "stable": true\n}\n';
+
+// A fixture skill is the only way to cover nested supporting files: both real skills have none.
+async function fixtureWithSupportingFiles(): Promise<string> {
+  const root = await copyFixtureRepo();
+  await writeSkill(root, REFERENCE_SLUG, {
+    "SKILL.md": skillMd({
+      name: REFERENCE_SLUG,
+      body: "# With references\n\nRead [the reference](reference.md) and [the values](data/values.json).\n",
+    }),
+    "reference.md": REFERENCE_MD,
+    "data/values.json": VALUES_JSON,
+  });
+  return root;
+}
+
+describe("supporting files end to end", () => {
+  let root: string;
+  let result: Awaited<ReturnType<typeof buildSpecArtifacts>>;
+  let artifact: SpecSkillArtifactV1;
+
+  beforeAll(async () => {
+    root = await fixtureWithSupportingFiles();
+    result = await buildFixture({ root });
+    artifact = result.artifacts.find(
+      (candidate) => candidate.skill.slug === REFERENCE_SLUG,
+    ) as SpecSkillArtifactV1;
+  });
+
+  it("discovers nested supporting files and excludes SKILL.md", () => {
+    expect(result.artifacts.map((entry) => entry.skill.slug)).toEqual([
+      "create-skill",
+      "using-parcel-mcp",
+      REFERENCE_SLUG,
+    ]);
+    expect(artifact.skill.files.map((file) => file.path)).toEqual([
+      "data/values.json",
+      "reference.md",
+    ]);
+    expect(artifact.skill.files.map((file) => file.mediaType)).toEqual([
+      "application/json",
+      "text/markdown",
+    ]);
+  });
+
+  it("hashes each supporting file from its source bytes", async () => {
+    for (const file of artifact.skill.files) {
+      const source = await fs.readFile(
+        path.join(root, "plugin", "skills", REFERENCE_SLUG, file.path),
+        "utf8",
+      );
+      const normalized = source.replace(/\r\n?/g, "\n");
+      expect(file.content).toBe(normalized);
+      expect(file.sha256).toBe(sha256Hex(normalized));
+      expect(file.bytes).toBe(Buffer.byteLength(normalized, "utf8"));
+    }
+  });
+
+  it("folds supporting files into the bundle hash and byte total", () => {
+    const canonical = `${artifact.skill.skillMd.sha256}\n${JSON.stringify(
+      artifact.skill.files.map(
+        ({ path: filePath, mediaType, bytes, sha256 }) => ({
+          path: filePath,
+          mediaType,
+          bytes,
+          sha256,
+        }),
+      ),
+    )}`;
+    expect(artifact.skill.sha256).toBe(sha256Hex(canonical));
+    expect(artifact.skill.bytes).toBe(
+      artifact.skill.skillMd.bytes +
+        artifact.skill.files.reduce((sum, file) => sum + file.bytes, 0),
+    );
+    const entry = result.catalog.skills.find(
+      (candidate) => candidate.slug === REFERENCE_SLUG,
+    );
+    expect(entry?.sha256).toBe(artifact.skill.sha256);
+    expect(entry?.artifactPath).toBe(
+      `skills/${REFERENCE_SLUG}.${artifact.skill.sha256}.json`,
+    );
+  });
+
+  it("verifies the emitted output that carries supporting files", async () => {
+    const verified = await verifySpecArtifacts(result.outDir);
+    expect(verified.findings).toEqual([]);
+    expect(verified.ok).toBe(true);
+  });
+});
+
+describe("generated output validates against the published schemas", () => {
+  const ajv = new Ajv2020({
+    strict: true,
+    allowUnionTypes: true,
+    allErrors: true,
+  });
+  let validateCatalog: ValidateFunction;
+  let validateArtifact: ValidateFunction;
+  let baseline: Awaited<ReturnType<typeof buildSpecArtifacts>>;
+  let extended: Awaited<ReturnType<typeof buildSpecArtifacts>>;
+
+  beforeAll(async () => {
+    const schemasRoot = path.join(repoRoot, "schemas");
+    validateCatalog = ajv.compile(
+      JSON.parse(
+        await fs.readFile(
+          path.join(schemasRoot, "spec-catalog.schema.json"),
+          "utf8",
+        ),
+      ),
+    );
+    validateArtifact = ajv.compile(
+      JSON.parse(
+        await fs.readFile(
+          path.join(schemasRoot, "spec-artifact.schema.json"),
+          "utf8",
+        ),
+      ),
+    );
+    baseline = await buildFixture();
+    extended = await buildFixture({ root: await fixtureWithSupportingFiles() });
+  });
+
+  async function readEmitted(
+    result: Awaited<ReturnType<typeof buildSpecArtifacts>>,
+    relative: string,
+  ): Promise<unknown> {
+    return JSON.parse(
+      await fs.readFile(path.join(result.outDir, relative), "utf8"),
+    );
+  }
+
+  it("accepts the real catalog and both real artifacts", async () => {
+    const catalog = await readEmitted(baseline, "catalog.json");
+    expect(
+      validateCatalog(catalog),
+      JSON.stringify(validateCatalog.errors),
+    ).toBe(true);
+    for (const entry of baseline.catalog.skills) {
+      const artifact = await readEmitted(baseline, entry.artifactPath);
+      expect(
+        validateArtifact(artifact),
+        JSON.stringify(validateArtifact.errors),
+      ).toBe(true);
+    }
+  });
+
+  it("accepts an artifact that carries supporting files", async () => {
+    const entry = extended.catalog.skills.find(
+      (candidate) => candidate.slug === REFERENCE_SLUG,
+    );
+    const artifact = await readEmitted(extended, entry?.artifactPath as string);
+    expect(
+      validateArtifact(artifact),
+      JSON.stringify(validateArtifact.errors),
+    ).toBe(true);
+    expect(
+      validateCatalog(await readEmitted(extended, "catalog.json")),
+      JSON.stringify(validateCatalog.errors),
+    ).toBe(true);
+  });
+
+  it("rejects an artifact with an extra key or a malformed hash", async () => {
+    const entry = baseline.catalog.skills[0];
+    const original = (await readEmitted(
+      baseline,
+      entry.artifactPath,
+    )) as Record<string, unknown>;
+
+    const extraKey = JSON.parse(JSON.stringify(original));
+    extraKey.builtAt = "2026-01-01T00:00:00Z";
+    expect(validateArtifact(extraKey)).toBe(false);
+
+    const nestedExtraKey = JSON.parse(JSON.stringify(original));
+    nestedExtraKey.skill.extra = true;
+    expect(validateArtifact(nestedExtraKey)).toBe(false);
+
+    const shortHash = JSON.parse(JSON.stringify(original));
+    shortHash.skill.sha256 = "abc123";
+    expect(validateArtifact(shortHash)).toBe(false);
+
+    const badCommit = JSON.parse(JSON.stringify(original));
+    badCommit.commit = original.commit?.toString().toUpperCase();
+    expect(validateArtifact(badCommit)).toBe(false);
+  });
+
+  it("rejects a catalog with an extra key or a malformed entry", async () => {
+    const original = (await readEmitted(baseline, "catalog.json")) as Record<
+      string,
+      unknown
+    >;
+
+    const extraKey = JSON.parse(JSON.stringify(original));
+    extraKey.generatedAt = "2026-01-01T00:00:00Z";
+    expect(validateCatalog(extraKey)).toBe(false);
+
+    const badEntry = JSON.parse(JSON.stringify(original));
+    badEntry.skills[0].sha256 = "not-a-hash";
+    expect(validateCatalog(badEntry)).toBe(false);
+
+    const badVisibility = JSON.parse(JSON.stringify(original));
+    badVisibility.skills[0].visibility.extraFlag = true;
+    expect(validateCatalog(badVisibility)).toBe(false);
   });
 });
