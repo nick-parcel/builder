@@ -38,7 +38,7 @@ If any answer is missing, ask. A skill written from guesses fails quietly and is
 
 1. Call `find_skill` with the person's own words, and `list_skills` to see what the workspace already has. If a close match exists, propose revising it. Two skills that trigger on the same situation both lose.
 2. Confirm the audience, then call `create_skill` with `audience` and a portable bundle. Personal keeps it private to its owner; Workspace makes it available to every active member. Ask; do not infer from tone.
-3. Call `get_skill` with the returned `skillId` to read the stored source and the current `draftVersion`. Read what Parcel stored, not what you meant to send.
+3. Call `get_skill` to read the stored source and the current `draftVersion`. It takes a `locator`, never a bare id, and it needs `view: "draft"` or it returns the published revision instead. Read what Parcel stored, not what you meant to send.
 4. Propose three realistic test prompts, run them past the person, and fold the result into a revision with `update_skill`, carrying the `expectedDraftVersion` you just read.
 5. Stop and ask for approval to publish. When the person approves that specific call, and only then, call `publish_skill` with the current `expectedDraftVersion`.
 
@@ -83,6 +83,19 @@ A minimal create call:
   }
 }
 ```
+
+Reading that draft back:
+
+```json
+{
+  "name": "get_skill",
+  "arguments": {
+    "locator": { "source": "custom", "skillId": "<skill-id>", "view": "draft" }
+  }
+}
+```
+
+The `draftVersion` in that response is the exact value to send as `expectedDraftVersion` on the next `update_skill` or `publish_skill`. To inspect a supporting file rather than SKILL.md, call `get_skill_file` with the same locator plus `path`.
 
 Supporting files may be `.md`, `.markdown`, `.txt`, or `.json`, with a media type matching the extension. Every relative Markdown link must point at a file you shipped in the same bundle.
 
