@@ -1,0 +1,30 @@
+{
+  "name": "parcel-skills",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "validate": "if [ -f scripts/validate.ts ]; then tsx scripts/validate.ts; else echo 'no validate script yet'; fi",
+    "check:generated": "if [ -f scripts/check-generated.ts ]; then tsx scripts/check-generated.ts; else echo 'no check:generated script yet'; fi",
+    "build:spec": "if [ -f scripts/build-spec.ts ]; then tsx scripts/build-spec.ts; else echo 'no build:spec script yet'; fi"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1",
+    "zod": "3.25.76"
+  }
+}

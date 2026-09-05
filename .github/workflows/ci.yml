@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Plugin content guard
+        run: |
+          if [ -d plugin ]; then
+            symlinks=$(find plugin -type l)
+            if [ -n "$symlinks" ]; then
+              echo "Symlinks are not allowed under plugin/:"
+              echo "$symlinks"
+              exit 1
+            fi
+            executables=$(find plugin -type f -perm -u+x)
+            if [ -n "$executables" ]; then
+              echo "Executable files are not allowed under plugin/:"
+              echo "$executables"
+              exit 1
+            fi
+          else
+            echo "plugin/ does not exist yet, skipping"
+          fi
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

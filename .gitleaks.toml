@@ -1,0 +1,4 @@
+title = "parcel-skills gitleaks config"
+
+[extend]
+useDefault = true
