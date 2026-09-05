@@ -120,6 +120,34 @@ describe("real repository manifests", () => {
     }
     await walk(path.join(repoRoot, "plugin"));
   });
+
+  it("every SKILL.md under plugin/ sits at plugin/skills/<slug>/SKILL.md", async () => {
+    const skillMdPaths: string[] = [];
+    async function walk(dir: string): Promise<void> {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          await walk(full);
+        } else if (entry.isFile() && entry.name === "SKILL.md") {
+          skillMdPaths.push(
+            path
+              .relative(path.join(repoRoot, "plugin"), full)
+              .split(path.sep)
+              .join("/"),
+          );
+        }
+      }
+    }
+    await walk(path.join(repoRoot, "plugin"));
+    // No skills exist yet; Task 3's additions will be checked by this same assertion.
+    expect(skillMdPaths).toEqual([]);
+    for (const skillMdPath of skillMdPaths) {
+      expect(skillMdPath).toMatch(
+        /^skills\/[a-z0-9]+(-[a-z0-9]+)*\/SKILL\.md$/,
+      );
+    }
+  });
 });
 
 describe("invalid fixtures", () => {
@@ -213,6 +241,34 @@ describe("invalid fixtures", () => {
   it("rejects a .sh file under plugin/", async () => {
     const rules = await findingRules(path.join(fixturesRoot, "sh-file"));
     expect(rules).toContain("path_forbidden_extension");
+  });
+
+  it("rejects a marketplace source pointing at a directory that does not exist", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "marketplace-source-missing"),
+    );
+    expect(rules).toContain("marketplace_source_missing");
+  });
+
+  it("rejects a SKILL.md outside plugin/skills/<slug>/", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "skill-outside-skills-dir"),
+    );
+    expect(rules).toContain("skill_location");
+  });
+
+  it("rejects a plugin/skills/<slug> directory without a SKILL.md", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "skill-dir-without-skill-md"),
+    );
+    expect(rules).toContain("skill_missing_skill_md");
+  });
+
+  it("rejects an extra entry inside plugin/.claude-plugin/", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "manifest-dir-extra-entry"),
+    );
+    expect(rules).toContain("plugin_manifest_dir_extra_entry");
   });
 });
 
