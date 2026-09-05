@@ -121,7 +121,9 @@ These artifacts are reproducible: running `pnpm check:generated` against the
 tagged commit, with `SOURCE_COMMIT`, `RELEASE_TAG`, and `PLUGIN_VERSION` set
 to match the tag, rebuilds byte-identical files and verifies the working tree
 is clean afterward. Parcel imports a tagged release of this repository
-through a checked-in sync tool; it never fetches GitHub at runtime.
+through a checked-in sync tool; it never fetches GitHub at runtime. Every
+skill's version in `catalog.json` equals `PLUGIN_VERSION`, since each skill's
+`metadata.parcel.version` always tracks the plugin manifest version.
 
 The `claude-org-plugin` zip described above is separate: it rolls forward with
 `main` and is not tied to a tag.

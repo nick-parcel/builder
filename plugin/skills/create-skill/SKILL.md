@@ -6,7 +6,7 @@ compatibility: Any MCP client connected to Parcel with the skills read and write
 metadata:
   parcel:
     schema-version: 1
-    version: 0.1.0
+    version: 0.2.1
     visibility:
       claude-plugin: true
       parcel-explore: false

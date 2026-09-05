@@ -52,7 +52,7 @@ describe("real repository manifests", () => {
     expect(report.ok).toBe(true);
   });
 
-  it("plugin identity is builder, version 0.2.0, license Apache-2.0", async () => {
+  it("plugin identity is builder, version 0.2.1, license Apache-2.0", async () => {
     const pluginJson = JSON.parse(
       await fs.readFile(
         path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
@@ -60,12 +60,29 @@ describe("real repository manifests", () => {
       ),
     );
     expect(pluginJson.name).toBe("builder");
-    expect(pluginJson.version).toBe("0.2.0");
+    expect(pluginJson.version).toBe("0.2.1");
     expect(pluginJson.license).toBe("Apache-2.0");
     expect(pluginJson.homepage).toBe("https://github.com/nick-parcel/builder");
     expect(pluginJson.repository).toBe(
       "https://github.com/nick-parcel/builder",
     );
+  });
+
+  it("every skill's metadata.parcel.version equals the plugin manifest version", async () => {
+    const pluginJson = JSON.parse(
+      await fs.readFile(
+        path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
+        "utf8",
+      ),
+    );
+    for (const slug of ["create-skill", "using-parcel-mcp"]) {
+      const skillMdContent = await fs.readFile(
+        path.join(repoRoot, "plugin", "skills", slug, "SKILL.md"),
+        "utf8",
+      );
+      const match = skillMdContent.match(/(?<!schema-)version:\s*([0-9.]+)/);
+      expect(match?.[1]).toBe(pluginJson.version);
+    }
   });
 
   it("marketplace references ./plugin exactly once with no command/archive source", async () => {
@@ -78,7 +95,7 @@ describe("real repository manifests", () => {
     expect(marketplaceJson.name).toBe("builder");
     expect(marketplaceJson.plugins).toHaveLength(1);
     expect(marketplaceJson.plugins[0].name).toBe("builder");
-    expect(marketplaceJson.plugins[0].version).toBe("0.2.0");
+    expect(marketplaceJson.plugins[0].version).toBe("0.2.1");
     expect(marketplaceJson.plugins[0].source).toBe("./plugin");
     expect(typeof marketplaceJson.plugins[0].source).toBe("string");
   });
@@ -239,6 +256,13 @@ describe("invalid fixtures", () => {
   it("rejects .mcp.json with the wrong url", async () => {
     const rules = await findingRules(path.join(fixturesRoot, "mcp-wrong-url"));
     expect(rules).toContain("mcp_url_mismatch");
+  });
+
+  it("rejects a skill whose metadata.parcel.version does not match the plugin version", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "skill-version-plugin-mismatch"),
+    );
+    expect(rules).toContain("skill_version_plugin_mismatch");
   });
 
   it("rejects .mcp.json with two servers", async () => {

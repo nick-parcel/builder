@@ -28,6 +28,8 @@ Human review is required for all source and manifest changes.
 
 Releases are built from a clean tagged commit. Each release records the
 commit, the tag, the schema version, and checksums of the built artifact.
+Every skill's `metadata.parcel.version` must equal `plugin/.claude-plugin/plugin.json`'s
+`version`, so any content change bumps the skill's version; the validator enforces this.
 
 ## Style
 

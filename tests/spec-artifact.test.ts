@@ -28,8 +28,8 @@ import {
 } from "./helpers/spec-fixture.js";
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
-const RELEASE_TAG = "v0.2.0";
-const PLUGIN_VERSION = "0.2.0";
+const RELEASE_TAG = "v0.2.1";
+const PLUGIN_VERSION = "0.2.1";
 
 const CONTEXT = {
   commit: COMMIT,
@@ -886,6 +886,7 @@ async function fixtureWithSupportingFiles(): Promise<string> {
   await writeSkill(root, REFERENCE_SLUG, {
     "SKILL.md": skillMd({
       name: REFERENCE_SLUG,
+      version: PLUGIN_VERSION,
       body: "# With references\n\nRead [the reference](reference.md) and [the values](data/values.json).\n",
     }),
     "reference.md": REFERENCE_MD,
