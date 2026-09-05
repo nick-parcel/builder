@@ -1,62 +1,109 @@
-# Parcel Skills
+# Parcel builder plugin
 
-This repository holds open Parcel skills and a content-only Claude Code
-plugin that connects clients to Parcel's Developer MCP at
-`https://mcp.parcelengineering.com/mcp` over OAuth.
+Connect an AI client to Parcel over OAuth and use open Parcel skills.
 
-## What this plugin is
+## Prerequisites
 
-The `parcel` plugin gives an AI client an MCP connection to Parcel plus two
-skills that teach it how to use that connection well. The plugin ships no
-executable content: only a manifest, an MCP server declaration, and skill
-prose.
+- The Claude Code CLI.
+- A Parcel workspace on the Pro plan, which is what gates the MCP surface.
 
-## Skills
-
-- `using-parcel-mcp`: connects to Parcel's remote MCP server, discovers which
-  tools and scope groups are granted, and explains scope or grant refusals
-  honestly instead of guessing.
-- `create-skill`: authors, revises, and publishes a Parcel skill through
-  Parcel's MCP skill tools, including choosing a Personal or Workspace
-  audience and recovering from a revision conflict.
-
-## Layout
-
-- `plugin/` is the only distributable directory. It ships as a Claude Code
-  plugin and contains no executable content, only skills and manifests.
-- Everything else in this repository is tooling: CI, tests, scripts, and
-  governance documents used to build and validate `plugin/`.
+Nothing else. The plugin ships no executable content: only a manifest, an MCP
+server declaration, and skill prose.
 
 ## Install
 
 ```
-claude plugin marketplace add nick-parcel/parcel-skills
-claude plugin install parcel@parcel-skills
+claude plugin marketplace add nick-parcel/builder
+claude plugin install builder@builder
 ```
 
-For local development against a checked-out copy of this repository, add the
-marketplace from a local path instead:
+Verify the install:
 
 ```
-claude plugin marketplace add /path/to/parcel-skills
-claude plugin install parcel@parcel-skills
+claude plugin list
 ```
 
-## How OAuth works
+`builder@builder` should appear as enabled, with two skills and one MCP
+server.
 
-The plugin declares Parcel's MCP server but never embeds a token, header, or
-credential. When you connect, your client prompts you to complete an OAuth
-authorization flow in the browser and stores the resulting grant itself.
-Never paste an access token or bearer header into a chat, a skill, or this
-repository. If a tool call fails with an authorization error, reconnect
-through your client's own MCP or connector settings.
+To develop against a checked-out copy of this repository, add the marketplace
+from a local path instead of the GitHub shorthand, then install the same
+plugin:
 
-## Security
+```
+claude plugin marketplace add /path/to/your/builder/checkout
+claude plugin install builder@builder
+```
 
-Skills in `plugin/` are content only: no hooks, no executables, no scripts,
-and no secrets. See [SECURITY.md](./SECURITY.md) for how to report
-vulnerabilities or exposed credentials through private vulnerability
-reporting; do not open a public issue.
+### Claude organization plugin upload
+
+Claude organization settings take a plugin as a zip archive rather than a
+marketplace reference. A rolling bundle of the current `main` is published at:
+
+```
+https://github.com/nick-parcel/builder/releases/download/claude-org-plugin/builder-plugin.zip
+```
+
+Download that file and upload it in the organization's plugin settings. The
+archive holds the contents of `plugin/`, so `.claude-plugin/plugin.json` sits
+at the archive root, which is the layout the uploader expects.
+
+## Connect Parcel
+
+The plugin registers a remote MCP server named `parcel` at
+`https://mcp.parcelengineering.com/mcp`. It never embeds a token, header, or
+credential. The first time a tool is needed, your client prompts you to
+complete an OAuth authorization in the browser and stores the grant itself.
+
+You can start that flow yourself with `/mcp` inside Claude Code, or with
+`claude mcp login parcel` from a shell. Never paste an access token or a
+bearer header into a chat, a skill, or this repository. If a call fails with
+an authorization error, reconnect through your client's own MCP settings.
+
+## Skills
+
+| Skill | Description |
+| --- | --- |
+| `/builder:using-parcel-mcp` | Connect to Parcel, discover which tools and scope groups the grant carries, search Parcel data, read or update workspace records, and explain a refusal honestly. |
+| `/builder:create-skill` | Author, revise, and publish a Parcel skill through Parcel's MCP skill tools, including the Personal or Workspace audience choice and revision conflicts. |
+
+### `/builder:using-parcel-mcp`
+
+Picks up when you ask what tools you have, want Parcel data searched, want a
+workspace record read or updated, or want to know why a call was refused. It
+inspects the live grant instead of reciting a tool list from memory, checks
+fields before composing an unfamiliar filter, and reports scope, plan, and
+expired-grant refusals rather than routing around them.
+
+```
+/builder:using-parcel-mcp what tools do I have
+```
+
+### `/builder:create-skill`
+
+Picks up when you want to write, revise, or publish a Parcel skill. It
+interviews you before drafting, keeps the frontmatter portable, asks which
+audience the skill is for, and recovers from a revision conflict by re-reading
+the draft instead of overwriting someone else's edit.
+
+```
+/builder:create-skill draft a workspace skill for weekly account reviews
+```
+
+## Other AI clients
+
+Cursor and Codex mirrors of this plugin are planned. Until they ship, point
+any other MCP client at Parcel directly by following the MCP setup pages in
+the Parcel developer documentation:
+<https://docs.parcelengineering.com/developers/mcp-reference/>.
+
+## Org preferences
+
+`docs/org-instructions/` holds text an administrator can paste into Claude
+organization preferences so that questions about accounts, contacts,
+projects, signals, saved views, and Parcel skills reach the Parcel MCP server
+without anyone having to say "using Parcel". Start with
+[docs/org-instructions/README.md](./docs/org-instructions/README.md).
 
 ## Release artifacts
 
@@ -76,9 +123,12 @@ to match the tag, rebuilds byte-identical files and verifies the working tree
 is clean afterward. Parcel imports a tagged release of this repository
 through a checked-in sync tool; it never fetches GitHub at runtime.
 
+The `claude-org-plugin` zip described above is separate: it rolls forward with
+`main` and is not tied to a tag.
+
 ## Verification status
 
-Release 0.1.0 was certified by a clean-room install, uninstall, and reinstall
+Release 0.2.0 was certified by a clean-room install, uninstall, and reinstall
 of the plugin from a fresh client profile; by `claude plugin validate
 --strict` against the plugin and the marketplace; by deterministic artifact
 verification (`pnpm check:generated`) and a byte-for-byte rebuild of the
@@ -88,3 +138,14 @@ The live OAuth authorization flow and a live skill-lifecycle exercise
 against production Parcel MCP are not part of this repository's CI. The
 maintainer performs that exercise on the Parcel side as a pre-merge check
 before each import of a tagged release.
+
+## Security
+
+Skills in `plugin/` are content only: no hooks, no executables, no scripts,
+and no secrets. See [SECURITY.md](./SECURITY.md) for how to report
+vulnerabilities or exposed credentials through private vulnerability
+reporting; do not open a public issue.
+
+## License
+
+Apache-2.0. See [LICENSE](./LICENSE).
