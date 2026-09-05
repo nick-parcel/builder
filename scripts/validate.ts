@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { z } from "zod";
 import { validateSkillDir } from "./read-skill.js";
 
@@ -426,9 +427,12 @@ async function walkPlugin(root: string, findings: Finding[]): Promise<void> {
   try {
     stat = await fs.lstat(pluginRoot);
   } catch {
+    findings.push({ path: "plugin", rule: "plugin_root_missing" });
     return;
   }
+  // A symlinked or non-directory root would skip every content check below.
   if (!stat.isDirectory()) {
+    findings.push({ path: "plugin", rule: "plugin_root_invalid" });
     return;
   }
 
@@ -583,7 +587,7 @@ async function main(): Promise<void> {
 }
 
 const isMain = process.argv[1]
-  ? import.meta.url === `file://${process.argv[1]}`
+  ? import.meta.url === pathToFileURL(process.argv[1]).href
   : false;
 if (isMain) {
   main().catch((err) => {
