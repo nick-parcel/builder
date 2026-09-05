@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { z } from "zod";
-import { validateSkillDir } from "./read-skill.js";
+import { readSkill, validateSkillDir } from "./read-skill.js";
 
 export interface Finding {
   path: string;
@@ -558,6 +558,60 @@ async function validateSkills(
   }
 }
 
+// Each skill's metadata.parcel.version must equal the plugin manifest version, so a
+// content change always bumps the version the release table keys installations on.
+async function validateSkillVersionsMatchPlugin(
+  root: string,
+  findings: Finding[],
+): Promise<void> {
+  const pluginJsonPath = path.join(
+    root,
+    "plugin",
+    ".claude-plugin",
+    "plugin.json",
+  );
+  const { value, error } = await readJson(pluginJsonPath);
+  if (error || typeof value !== "object" || value === null) {
+    return;
+  }
+  const pluginVersion = (value as Record<string, unknown>).version;
+  if (typeof pluginVersion !== "string") {
+    return;
+  }
+
+  const skillsRoot = path.join(root, "plugin", "skills");
+  let entries: string[];
+  try {
+    entries = await fs.readdir(skillsRoot);
+  } catch {
+    return;
+  }
+  for (const entry of entries.sort()) {
+    const skillDir = path.join(skillsRoot, entry);
+    const stat = await fs.lstat(skillDir);
+    if (!stat.isDirectory()) {
+      continue;
+    }
+    let skillVersion: unknown;
+    try {
+      const skill = await readSkill(skillDir);
+      const metadata = skill.frontmatter.metadata as
+        | Record<string, unknown>
+        | undefined;
+      const parcel = metadata?.parcel as Record<string, unknown> | undefined;
+      skillVersion = parcel?.version;
+    } catch {
+      continue;
+    }
+    if (skillVersion !== pluginVersion) {
+      findings.push({
+        path: `plugin/skills/${entry}/SKILL.md`,
+        rule: "skill_version_plugin_mismatch",
+      });
+    }
+  }
+}
+
 export async function validateRepository(
   root: string,
 ): Promise<ValidationReport> {
@@ -567,6 +621,7 @@ export async function validateRepository(
   await validateSkills(root, findings);
   await validatePluginManifest(root, findings);
   await validateMcpManifest(root, findings);
+  await validateSkillVersionsMatchPlugin(root, findings);
   await walkPlugin(root, findings);
 
   return { ok: findings.length === 0, findings };
