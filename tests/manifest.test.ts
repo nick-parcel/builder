@@ -1,0 +1,239 @@
+import { execFile, execSync } from "node:child_process";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { promisify } from "node:util";
+import { describe, expect, it } from "vitest";
+import { type Finding, validateRepository } from "../scripts/validate.js";
+
+const execFileAsync = promisify(execFile);
+const repoRoot = path.resolve(__dirname, "..");
+const fixturesRoot = path.join(__dirname, "fixtures", "invalid");
+
+async function findingRules(root: string) {
+  const report = await validateRepository(root);
+  return report.findings.map((f: Finding) => f.rule);
+}
+
+async function copyToTempDir(fixtureName: string) {
+  const src = path.join(fixturesRoot, fixtureName);
+  const dest = await fs.mkdtemp(
+    path.join(os.tmpdir(), `parcel-fixture-${fixtureName}-`),
+  );
+  await fs.cp(src, dest, { recursive: true, verbatimSymlinks: true });
+  return dest;
+}
+
+let claudeAvailable = true;
+try {
+  execSync("command -v claude", { stdio: "ignore" });
+} catch {
+  claudeAvailable = false;
+}
+
+describe("real repository manifests", () => {
+  it("validates with no findings", async () => {
+    const report = await validateRepository(repoRoot);
+    expect(report.findings).toEqual([]);
+    expect(report.ok).toBe(true);
+  });
+
+  it("plugin identity is parcel, version 0.1.0, license Apache-2.0", async () => {
+    const pluginJson = JSON.parse(
+      await fs.readFile(
+        path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
+        "utf8",
+      ),
+    );
+    expect(pluginJson.name).toBe("parcel");
+    expect(pluginJson.version).toBe("0.1.0");
+    expect(pluginJson.license).toBe("Apache-2.0");
+  });
+
+  it("marketplace references ./plugin exactly once with no command/archive source", async () => {
+    const marketplaceJson = JSON.parse(
+      await fs.readFile(
+        path.join(repoRoot, ".claude-plugin", "marketplace.json"),
+        "utf8",
+      ),
+    );
+    expect(marketplaceJson.plugins).toHaveLength(1);
+    expect(marketplaceJson.plugins[0].source).toBe("./plugin");
+    expect(typeof marketplaceJson.plugins[0].source).toBe("string");
+  });
+
+  it("plugin.mcp.json has exactly one parcel http server with the exact production url", async () => {
+    const mcpJson = JSON.parse(
+      await fs.readFile(path.join(repoRoot, "plugin", ".mcp.json"), "utf8"),
+    );
+    const servers = Object.keys(mcpJson.mcpServers);
+    expect(servers).toEqual(["parcel"]);
+    expect(mcpJson.mcpServers.parcel.type).toBe("http");
+    expect(mcpJson.mcpServers.parcel.url).toBe(
+      "https://mcp.parcelengineering.com/mcp",
+    );
+    expect(mcpJson.mcpServers.parcel.headers).toBeUndefined();
+    expect(mcpJson.mcpServers.parcel.env).toBeUndefined();
+    expect(mcpJson.mcpServers.parcel.command).toBeUndefined();
+    expect(mcpJson.mcpServers.parcel.args).toBeUndefined();
+  });
+
+  it("plugin.json has no forbidden keys", async () => {
+    const pluginJson = JSON.parse(
+      await fs.readFile(
+        path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
+        "utf8",
+      ),
+    );
+    for (const key of [
+      "skills",
+      "commands",
+      "agents",
+      "hooks",
+      "mcpServers",
+      "workflows",
+      "lspServers",
+      "bin",
+      "dependencies",
+      "userConfig",
+      "experimental",
+      "outputStyles",
+    ]) {
+      expect(pluginJson).not.toHaveProperty(key);
+    }
+  });
+
+  it("has no symlinks or executable files under plugin/", async () => {
+    async function walk(dir: string): Promise<void> {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        const stat = await fs.lstat(full);
+        expect(stat.isSymbolicLink()).toBe(false);
+        if (stat.isFile()) {
+          expect(stat.mode & 0o111).toBe(0);
+        }
+        if (stat.isDirectory()) {
+          await walk(full);
+        }
+      }
+    }
+    await walk(path.join(repoRoot, "plugin"));
+  });
+});
+
+describe("invalid fixtures", () => {
+  it("rejects a symlink under plugin/", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "plugin-symlink"));
+    expect(rules).toContain("path_symlink");
+  });
+
+  it("rejects an executable file under plugin/", async () => {
+    const dir = await copyToTempDir("plugin-executable");
+    const target = path.join(dir, "plugin", "notes.md");
+    await fs.chmod(target, 0o755);
+    const rules = await findingRules(dir);
+    expect(rules).toContain("path_executable");
+  });
+
+  it("rejects a marketplace source that escapes the repository", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "path-escape"));
+    expect(rules).toContain("marketplace_source_pattern_invalid");
+  });
+
+  it("rejects a marketplace with a second plugin entry", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "second-plugin-entry"),
+    );
+    expect(rules).toContain("marketplace_plugin_count");
+  });
+
+  it("rejects a marketplace with a command source", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "command-source"));
+    expect(rules).toContain("marketplace_source_command_forbidden");
+  });
+
+  it("rejects a marketplace with an archive source", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "archive-source"));
+    expect(rules).toContain("marketplace_source_archive_forbidden");
+  });
+
+  it("rejects .mcp.json with headers", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "mcp-headers"));
+    expect(rules).toContain("mcp_forbidden_key_headers");
+  });
+
+  it("rejects .mcp.json with a command entry", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "mcp-command"));
+    expect(rules).toContain("mcp_forbidden_key_command");
+  });
+
+  it("rejects .mcp.json with the wrong url", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "mcp-wrong-url"));
+    expect(rules).toContain("mcp_url_mismatch");
+  });
+
+  it("rejects .mcp.json with two servers", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "mcp-two-servers"),
+    );
+    expect(rules).toContain("mcp_multiple_servers");
+  });
+
+  it("rejects plugin.json with hooks", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "plugin-hooks"));
+    expect(rules).toContain("plugin_forbidden_key_hooks");
+  });
+
+  it("rejects plugin.json with mcpServers", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "plugin-mcpservers"),
+    );
+    expect(rules).toContain("plugin_forbidden_key_mcp_servers");
+  });
+
+  it("rejects plugin.json with bin and dependencies", async () => {
+    const rules = await findingRules(
+      path.join(fixturesRoot, "plugin-bin-dependencies"),
+    );
+    expect(rules).toContain("plugin_forbidden_key_bin");
+    expect(rules).toContain("plugin_forbidden_key_dependencies");
+  });
+
+  it("rejects a fake secret under plugin/ without leaking the value", async () => {
+    const report = await validateRepository(
+      path.join(fixturesRoot, "fake-secret"),
+    );
+    const rules = report.findings.map((f: Finding) => f.rule);
+    expect(rules).toContain("secret_aws_access_key");
+    const serialized = JSON.stringify(report);
+    expect(serialized).not.toContain("AKIAIOSFODNN7EXAMPLE");
+  });
+
+  it("rejects a .sh file under plugin/", async () => {
+    const rules = await findingRules(path.join(fixturesRoot, "sh-file"));
+    expect(rules).toContain("path_forbidden_extension");
+  });
+});
+
+describe("claude plugin validate --strict", () => {
+  it.skipIf(!claudeAvailable)("passes for ./plugin", async () => {
+    await expect(
+      execFileAsync("claude", ["plugin", "validate", "--strict", "./plugin"], {
+        cwd: repoRoot,
+      }),
+    ).resolves.toBeDefined();
+  });
+
+  it.skipIf(!claudeAvailable)("passes for the repository root", async () => {
+    await expect(
+      execFileAsync("claude", ["plugin", "validate", "--strict", "."], {
+        cwd: repoRoot,
+      }),
+    ).resolves.toBeDefined();
+  });
+
+  if (!claudeAvailable) {
+    it.skip("claude CLI not found on PATH, skipping strict validation", () => {});
+  }
+});

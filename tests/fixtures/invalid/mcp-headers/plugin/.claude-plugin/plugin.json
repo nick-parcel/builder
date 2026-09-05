@@ -1,0 +1,7 @@
+{
+  "name": "parcel",
+  "version": "0.1.0",
+  "description": "Connect an AI client to Parcel and use open Parcel skills.",
+  "author": { "name": "Parcel" },
+  "license": "Apache-2.0"
+}

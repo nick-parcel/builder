@@ -37,6 +37,18 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Validate repository
+        run: pnpm validate
+
+      - name: Claude plugin validate (if available)
+        run: |
+          if command -v claude >/dev/null 2>&1; then
+            claude plugin validate --strict ./plugin
+            claude plugin validate --strict .
+          else
+            echo "claude CLI not installed on this runner, relying on pnpm validate and pinned schema tests"
+          fi
+
       - name: Plugin content guard
         run: |
           if [ -d plugin ]; then

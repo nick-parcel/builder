@@ -13,8 +13,10 @@ that connects clients to Parcel's Developer MCP at
 
 ## Install
 
-Installation instructions will be added once the plugin manifest and release
-workflow land.
+```
+claude plugin marketplace add nick-parcel/parcel-skills
+claude plugin install parcel@parcel-skills
+```
 
 ## Security
 

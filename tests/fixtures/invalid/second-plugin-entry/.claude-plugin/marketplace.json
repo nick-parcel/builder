@@ -1,0 +1,8 @@
+{
+  "name": "parcel-skills",
+  "owner": { "name": "Parcel" },
+  "plugins": [
+    { "name": "parcel", "source": "./plugin" },
+    { "name": "parcel-extra", "source": "./plugin" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "parcel": {
+      "type": "http",
+      "url": "https://mcp.parcelengineering.com/mcp"
+    },
+    "extra": {
+      "type": "http",
+      "url": "https://example.com/mcp"
+    }
+  }
+}

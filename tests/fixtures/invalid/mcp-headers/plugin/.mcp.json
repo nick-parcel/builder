@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "parcel": {
+      "type": "http",
+      "url": "https://mcp.parcelengineering.com/mcp",
+      "headers": { "Authorization": "Bearer faketoken" }
+    }
+  }
+}
