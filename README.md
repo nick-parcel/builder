@@ -65,7 +65,7 @@ an authorization error, reconnect through your client's own MCP settings.
 | Skill | Description |
 | --- | --- |
 | `/builder:using-parcel-mcp` | Connect to Parcel, discover which tools and scope groups the grant carries, search Parcel data, read or update workspace records, and explain a refusal honestly. |
-| `/builder:create-skill` | Author, revise, and publish a Parcel skill through Parcel's MCP skill tools, including the Personal or Workspace audience choice and revision conflicts. |
+| `/builder:create-skill` | Author, test, revise, and publish a Parcel skill through Parcel's MCP skill tools, including description triggering, the Personal or Workspace audience choice, and revision conflicts. |
 
 ### `/builder:using-parcel-mcp`
 
@@ -81,10 +81,12 @@ expired-grant refusals rather than routing around them.
 
 ### `/builder:create-skill`
 
-Picks up when you want to write, revise, or publish a Parcel skill. It
-interviews you before drafting, keeps the frontmatter portable, asks which
-audience the skill is for, and recovers from a revision conflict by re-reading
-the draft instead of overwriting someone else's edit.
+Picks up when you want to write, revise, or publish a Parcel skill. It meets
+you wherever you already are in the loop, drafts from your own words, tries
+the draft on realistic test prompts and shows you the results, helps you write
+a description that actually triggers, asks which audience the skill is for,
+waits for your approval before publishing, and recovers from a revision
+conflict by re-reading the draft instead of overwriting someone else's edit.
 
 ```
 /builder:create-skill draft a workspace skill for weekly account reviews

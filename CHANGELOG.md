@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-05
+
+### Changed
+
+- create-skill rewritten as a coaching loop: meets the member where they are, plain-language mode, description-writing guidance with a trigger test, test-prompt iteration, and managing existing skills.
+
 ## [0.2.1] - 2026-09-05
 
 ### Fixed
