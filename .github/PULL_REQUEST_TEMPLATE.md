@@ -1,3 +1,5 @@
+Tested Claude Code version:
+
 ## Checklist
 
 - [ ] Frontmatter is portable (`name`, `description`, `license`, `compatibility`, `metadata` only)
