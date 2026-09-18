@@ -6,7 +6,7 @@ compatibility: Any MCP client that can connect to a remote HTTP MCP server and c
 metadata:
   parcel:
     schema-version: 1
-    version: 0.2.2
+    version: 0.2.3
     visibility:
       claude-plugin: true
       parcel-explore: false
