@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-09-17
+
+### Fixed
+
+- create-skill no longer tells a custom skill to carry `metadata.parcel`, which Parcel reserves for official skills and refuses as `frontmatter.metadata_reserved`; every create attempt through Spec failed on it.
+
 ## [0.2.2] - 2026-09-05
 
 ### Changed

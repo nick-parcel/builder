@@ -6,7 +6,7 @@ compatibility: Any MCP client connected to Parcel with the skills read and write
 metadata:
   parcel:
     schema-version: 1
-    version: 0.2.2
+    version: 0.2.3
     visibility:
       claude-plugin: true
       parcel-explore: false
@@ -52,7 +52,7 @@ Every write takes an `idempotencyKey`. Generate a fresh one per logical write, a
 
 ## Bundle shape
 
-The header carries exactly `name`, `description`, `license`, `compatibility`, and `metadata`, whose `parcel` map holds `schema-version: 1` and a semver `version`. Host execution fields such as a top-level `version`, `allowed-tools`, `tools`, `hooks`, `commands`, or `scripts` are refused.
+The header carries `name` and `description`, and may carry `license` and `compatibility`. Never add `metadata`: `metadata.parcel` is reserved for official skills and refused as `frontmatter.metadata_reserved`. Host execution fields such as a top-level `version`, `allowed-tools`, `tools`, `hooks`, `commands`, or `scripts` are refused.
 
 The slug must match `^[a-z0-9]+(-[a-z0-9]+)*$`. `create-skill` and `improve-skill` are reserved: Parcel refuses them as `slug_conflict` with reason `reserved_slug`. Name the skill for what the reader does.
 
@@ -69,7 +69,7 @@ A minimal create call:
         {
           "path": "SKILL.md",
           "mediaType": "text/markdown",
-          "content": "---\nname: weekly-pipeline-review\ndescription: Use when preparing the Monday pipeline review.\nlicense: Apache-2.0\ncompatibility: Workspaces that track projects\nmetadata:\n  parcel:\n    schema-version: 1\n    version: 0.1.0\n---\n\n# Weekly pipeline review\n"
+          "content": "---\nname: weekly-pipeline-review\ndescription: Use when preparing the Monday pipeline review.\nlicense: Apache-2.0\ncompatibility: Workspaces that track projects\n---\n\n# Weekly pipeline review\n"
         }
       ]
     }
