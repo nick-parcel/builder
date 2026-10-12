@@ -26,6 +26,7 @@ const CONTRACTS: Record<string, readonly string[]> = {
     "approves publishing",
     "say so before asking anything",
     "publish it from the draft card",
+    "the name `icp` is already taken",
   ],
   "build-prospect-list": [
     "load the workspace's `icp` skill",

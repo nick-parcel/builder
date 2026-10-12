@@ -20,3 +20,4 @@ Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the
 - Asks no more than three rounds of questions, each with a recommended answer.
 - Leaves a ready-to-publish `icp` draft in Spec (published from the draft card); over MCP, publishes only after approval.
 - Proposes tiers in a table and writes them only after approval, in batches of 100 or fewer.
+- When another member holds an unpublished `icp` draft, reports the taken name and stops instead of saving a second profile.
