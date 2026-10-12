@@ -2,7 +2,7 @@
 name: build-icp
 description: Use when someone wants to set up, define, or update the firm's ICP (ideal customer profile), decide which developers, architects, or projects to target, set ICP tiers on accounts, or asks who we should be targeting. Saves the result as the workspace's own skill named icp, which the other Parcel skills read. Do not use for ranking today's projects, use the build-prospect-list skill instead.
 license: Apache-2.0
-compatibility: Parcel Spec, or any MCP client connected to Parcel with the skills read and write scope groups granted
+compatibility: Parcel Spec, or any MCP client connected to Parcel with the skills and workspace read and write scope groups granted
 metadata:
   parcel:
     schema-version: 1
@@ -22,11 +22,12 @@ The ICP (ideal customer profile) says which accounts and projects this firm wins
 
 Read [the Parcel data notes](reference/parcel-data.md) before you start. The profile's exact shape is in [the ICP template](reference/icp-template.md).
 
-## Where this runs
+## Before you start
 
-- In Parcel, the member starts it from the Set up or Update ICP button on Build ICP in Explore, which opens a skill-authoring conversation. Saving the `icp` skill happens in that conversation.
-- In another assistant connected to Parcel over MCP, the member asks for it. Saving uses the same skill drafting and publishing steps.
-- If you cannot save a skill where you are running, finish the interview, show the finished profile, and tell the member to open Skills, then Explore, and choose Set up on Build ICP to save it.
+Check that you can save a skill where you are running: drafting a skill has to be one of the actions open to you.
+
+- In Parcel, saving happens in the conversation that the Set up or Update ICP button opens (Skills, then Explore, then Build ICP). If this conversation cannot save skills, say so before asking anything and point the member to that button. Offer to carry over what they have already told you; they can paste it into the new conversation.
+- In another assistant connected to Parcel over MCP, the skill drafting and publishing actions do the saving.
 
 ## Workflow
 
@@ -40,7 +41,7 @@ Read [the Parcel data notes](reference/parcel-data.md) before you start. The pro
    Summarize the pattern in a few lines, for example "your tracked projects are mostly 4 to 7 story residential in Somerville and Cambridge, at filed or under review".
 3. Interview. Ask at most three rounds of up to four questions, each with a recommended answer drawn from the evidence. Skip anything the evidence already answers. Cover, in this order: who we are and who usually hires us; target projects; target accounts and competitors; priority buckets and why-now signals; outreach voice; CRM defaults. CRM defaults are optional; leave them "Not set" if the member wants to move on.
 4. Draft the profile in the template's shape and show it in full. Take edits until the member is happy.
-5. Save it as a workspace skill named `icp`, with the Workspace audience so every member and every Parcel skill reads the same profile. Draft first, read back what was stored, and publish only after the member approves publishing.
+5. Save it as a workspace skill named `icp`, with the Workspace audience so every member and every Parcel skill reads the same profile. Draft first and read back what was stored. In Parcel, leave a ready-to-publish draft and ask the member to publish it from the draft card; over MCP, publish only after the member approves publishing. The other skills read the profile only once it is published, so say so if the member waits.
 6. Propose ICP tiers. Find accounts active in the target markets over the last two years whose type and projects fit the profile. Rank them, take the top 100 plus every named target and every excluded account, and propose a tier for each with a one-line reason:
    - Tier 1: named targets, and accounts whose recent projects fit on market, use, size, and stage.
    - Tier 2: fit on most of those.

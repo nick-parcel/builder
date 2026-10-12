@@ -1,6 +1,6 @@
 ---
 name: build-prospect-list
-description: Use when someone asks for a prospect list, who to focus on, the top projects or accounts this week or month, priority buckets, the best opportunities in a city, or which developers or architects to target now. Ranks active projects and the accounts behind them into Priority, Secondary, and Watch with reasons. Do not use for one project, use the project-brief skill; for drafting emails, use the research-and-write-outreach skill.
+description: Use when someone asks for a prospect list, who to focus on, the top projects or accounts this week or month, priority buckets, the best opportunities in a city, or which developers or architects to target now. Ranks active projects and the accounts behind them into Priority, Secondary, and Watch with reasons. Do not use for one project, use the project-brief skill; for drafting emails, use the research-and-write-outreach skill; for setting up the ICP, use the build-icp skill.
 license: Apache-2.0
 compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:

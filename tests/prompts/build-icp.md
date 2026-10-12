@@ -15,7 +15,8 @@ Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the
 
 ## Behavior checks
 
+- In an ordinary Spec chat, says it cannot save a skill there and points to Set up before asking anything.
 - Reads workspace evidence and summarizes it before the first question.
 - Asks no more than three rounds of questions, each with a recommended answer.
-- Saves a Workspace skill named `icp` only after the member approves publishing.
+- Leaves a ready-to-publish `icp` draft in Spec (published from the draft card); over MCP, publishes only after approval.
 - Proposes tiers in a table and writes them only after approval, in batches of 100 or fewer.
