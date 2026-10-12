@@ -17,6 +17,11 @@ import {
   verifySpecArtifacts,
 } from "../scripts/check-generated.js";
 import {
+  PLUGIN_VERSION,
+  SHIPPED_SKILLS,
+  expectedVisibility,
+} from "./helpers/shipped-skills.js";
+import {
   cleanupTempDirs,
   copyFixtureRepo,
   initGitRepo,
@@ -28,8 +33,7 @@ import {
 } from "./helpers/spec-fixture.js";
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
-const RELEASE_TAG = "v0.2.3";
-const PLUGIN_VERSION = "0.2.3";
+const RELEASE_TAG = `v${PLUGIN_VERSION}`;
 
 const CONTEXT = {
   commit: COMMIT,
@@ -99,14 +103,12 @@ describe("spec artifact contract", () => {
     }
   });
 
-  it("emits both real skills sorted by slug with normalized source paths", () => {
+  it("emits every real skill sorted by slug with normalized source paths", () => {
     expect(result.artifacts.map((artifact) => artifact.skill.slug)).toEqual([
-      "create-skill",
-      "using-parcel-mcp",
+      ...SHIPPED_SKILLS,
     ]);
     expect(result.catalog.skills.map((entry) => entry.slug)).toEqual([
-      "create-skill",
-      "using-parcel-mcp",
+      ...SHIPPED_SKILLS,
     ]);
     for (const artifact of result.artifacts) {
       expect(artifact.sourcePath).toBe(`plugin/skills/${artifact.skill.slug}`);
@@ -127,13 +129,17 @@ describe("spec artifact contract", () => {
   });
 
   it("projects visibility from the kebab-case metadata keys", () => {
+    const camel = (slug: string) => {
+      const flags = expectedVisibility(slug);
+      return {
+        claudePlugin: flags["claude-plugin"],
+        parcelExplore: flags["parcel-explore"],
+        parcelInstallable: flags["parcel-installable"],
+        parcelRuntime: flags["parcel-runtime"],
+      };
+    };
     for (const artifact of result.artifacts) {
-      expect(artifact.skill.visibility).toEqual({
-        claudePlugin: true,
-        parcelExplore: false,
-        parcelInstallable: false,
-        parcelRuntime: false,
-      });
+      expect(artifact.skill.visibility).toEqual(camel(artifact.skill.slug));
       expect(Object.keys(artifact.skill.visibility)).toEqual([
         "claudePlugin",
         "parcelExplore",
@@ -142,10 +148,7 @@ describe("spec artifact contract", () => {
       ]);
     }
     for (const entry of result.catalog.skills) {
-      expect(entry.visibility.claudePlugin).toBe(true);
-      expect(entry.visibility.parcelExplore).toBe(false);
-      expect(entry.visibility.parcelInstallable).toBe(false);
-      expect(entry.visibility.parcelRuntime).toBe(false);
+      expect(entry.visibility).toEqual(camel(entry.slug));
     }
   });
 
@@ -165,12 +168,33 @@ describe("spec artifact contract", () => {
     }
   });
 
-  it("lists the complete supporting-file inventory and bundle hashes", () => {
+  it("lists the complete supporting-file inventory and bundle hashes", async () => {
     for (const artifact of result.artifacts) {
-      expect(artifact.skill.files).toEqual([]);
-      const canonical = `${artifact.skill.skillMd.sha256}\n[]`;
+      const skillDir = path.join(
+        repoRoot,
+        "plugin",
+        "skills",
+        artifact.skill.slug,
+      );
+      const onDisk = (await listFilesRecursive(skillDir))
+        .filter((file) => file !== "SKILL.md")
+        .sort();
+      expect(artifact.skill.files.map((file) => file.path)).toEqual(onDisk);
+      const canonical = `${artifact.skill.skillMd.sha256}\n${JSON.stringify(
+        artifact.skill.files.map(
+          ({ path: filePath, mediaType, bytes, sha256 }) => ({
+            path: filePath,
+            mediaType,
+            bytes,
+            sha256,
+          }),
+        ),
+      )}`;
       expect(artifact.skill.sha256).toBe(sha256Hex(canonical));
-      expect(artifact.skill.bytes).toBe(artifact.skill.skillMd.bytes);
+      expect(artifact.skill.bytes).toBe(
+        artifact.skill.skillMd.bytes +
+          artifact.skill.files.reduce((sum, file) => sum + file.bytes, 0),
+      );
     }
   });
 
@@ -331,7 +355,7 @@ describe("builder refusals", () => {
       "SKILL.md": skillMd({ name: "Create-Skill" }),
     });
     const skills = await fs.readdir(path.join(root, "plugin", "skills"));
-    if (skills.length === 3) {
+    if (skills.length === SHIPPED_SKILLS.length + 1) {
       const error = await expectBuildError(buildFixture({ root }));
       expect(error.rule).toBe("skill_slug_case_collision");
     }
@@ -518,7 +542,7 @@ describe("builder refusals", () => {
 
   it("refuses a release tag that is not v plus the plugin version", async () => {
     const error = await expectBuildError(
-      buildFixture({ releaseTag: "v0.3.0" }),
+      buildFixture({ releaseTag: "v99.0.0" }),
     );
     expect(error.rule).toBe("release_tag_mismatch");
   });
@@ -581,7 +605,7 @@ describe("builder refusals", () => {
     expect(error.rule).toBe("output_dir_not_empty");
 
     const forced = await buildFixture({ outDir, force: true });
-    expect(forced.catalog.skills).toHaveLength(2);
+    expect(forced.catalog.skills).toHaveLength(SHIPPED_SKILLS.length);
     const files = await listFilesRecursive(outDir);
     expect(files).toContain("stale.txt");
     expect(files).toContain("catalog.json");
@@ -880,7 +904,7 @@ const REFERENCE_SLUG = "with-references";
 const REFERENCE_MD = "# Reference\n\nA supporting reference file.\n";
 const VALUES_JSON = '{\n  "stable": true\n}\n';
 
-// A fixture skill is the only way to cover nested supporting files: both real skills have none.
+// A fixture skill pins nested supporting files independently of the real skills.
 async function fixtureWithSupportingFiles(): Promise<string> {
   const root = await copyFixtureRepo();
   await writeSkill(root, REFERENCE_SLUG, {
@@ -909,11 +933,9 @@ describe("supporting files end to end", () => {
   });
 
   it("discovers nested supporting files and excludes SKILL.md", () => {
-    expect(result.artifacts.map((entry) => entry.skill.slug)).toEqual([
-      "create-skill",
-      "using-parcel-mcp",
-      REFERENCE_SLUG,
-    ]);
+    expect(result.artifacts.map((entry) => entry.skill.slug)).toEqual(
+      [...SHIPPED_SKILLS, REFERENCE_SLUG].sort(),
+    );
     expect(artifact.skill.files.map((file) => file.path)).toEqual([
       "data/values.json",
       "reference.md",
@@ -1011,7 +1033,7 @@ describe("generated output validates against the published schemas", () => {
     );
   }
 
-  it("accepts the real catalog and both real artifacts", async () => {
+  it("accepts the real catalog and every real artifact", async () => {
     const catalog = await readEmitted(baseline, "catalog.json");
     expect(
       validateCatalog(catalog),

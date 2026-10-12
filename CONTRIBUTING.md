@@ -6,6 +6,10 @@ Skill frontmatter is portable only: `name`, `description`, `license`,
 `compatibility`, `metadata`. Never `allowed-tools`, hooks, MCP manifests, or
 any host execution field. Parcel catalog data lives under `metadata.parcel`.
 
+Visibility under `metadata.parcel.visibility` is one of two profiles:
+external-only (`claude-plugin: true`, the three Parcel flags `false`) or every
+surface (all four `true`). The validator refuses any other mix.
+
 ## No secrets, no executables
 
 Never commit secrets, tokens, local paths, or executable content. This
@@ -18,7 +22,9 @@ Every file referenced from a skill or manifest must exist in the repository.
 
 ## Evals
 
-Every skill needs at least one eval case.
+Every skill needs at least one eval case. Business skills are written by
+intent rather than tool order, so their eval is a contract entry in
+`tests/business-skills.test.ts` plus live prompts in `tests/prompts/<slug>.md`.
 
 ## Review
 

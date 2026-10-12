@@ -5,6 +5,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { type Finding, validateRepository } from "../scripts/validate.js";
+import { PLUGIN_VERSION, SHIPPED_SKILLS } from "./helpers/shipped-skills.js";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(__dirname, "..");
@@ -52,7 +53,7 @@ describe("real repository manifests", () => {
     expect(report.ok).toBe(true);
   });
 
-  it("plugin identity is builder, version 0.2.3, license Apache-2.0", async () => {
+  it(`plugin identity is builder, version ${PLUGIN_VERSION}, license Apache-2.0`, async () => {
     const pluginJson = JSON.parse(
       await fs.readFile(
         path.join(repoRoot, "plugin", ".claude-plugin", "plugin.json"),
@@ -60,7 +61,7 @@ describe("real repository manifests", () => {
       ),
     );
     expect(pluginJson.name).toBe("builder");
-    expect(pluginJson.version).toBe("0.2.3");
+    expect(pluginJson.version).toBe(PLUGIN_VERSION);
     expect(pluginJson.license).toBe("Apache-2.0");
     expect(pluginJson.homepage).toBe("https://github.com/nick-parcel/builder");
     expect(pluginJson.repository).toBe(
@@ -75,7 +76,7 @@ describe("real repository manifests", () => {
         "utf8",
       ),
     );
-    for (const slug of ["create-skill", "using-parcel-mcp"]) {
+    for (const slug of SHIPPED_SKILLS) {
       const skillMdContent = await fs.readFile(
         path.join(repoRoot, "plugin", "skills", slug, "SKILL.md"),
         "utf8",
@@ -95,7 +96,7 @@ describe("real repository manifests", () => {
     expect(marketplaceJson.name).toBe("builder");
     expect(marketplaceJson.plugins).toHaveLength(1);
     expect(marketplaceJson.plugins[0].name).toBe("builder");
-    expect(marketplaceJson.plugins[0].version).toBe("0.2.3");
+    expect(marketplaceJson.plugins[0].version).toBe(PLUGIN_VERSION);
     expect(marketplaceJson.plugins[0].source).toBe("./plugin");
     expect(typeof marketplaceJson.plugins[0].source).toBe("string");
   });
@@ -173,10 +174,11 @@ describe("real repository manifests", () => {
       }
     }
     await walk(path.join(repoRoot, "plugin"));
-    expect(skillMdPaths.map((p) => path.relative(repoRoot, p)).sort()).toEqual([
-      path.join("plugin", "skills", "create-skill", "SKILL.md"),
-      path.join("plugin", "skills", "using-parcel-mcp", "SKILL.md"),
-    ]);
+    expect(skillMdPaths.map((p) => path.relative(repoRoot, p)).sort()).toEqual(
+      SHIPPED_SKILLS.map((slug) =>
+        path.join("plugin", "skills", slug, "SKILL.md"),
+      ),
+    );
   });
 
   it("accepts a synthetic skill at plugin/skills/<slug>/SKILL.md", async () => {

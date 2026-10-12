@@ -39,6 +39,13 @@ const EXTERNAL_ONLY_VISIBILITY: Record<string, boolean> = {
   "parcel-runtime": false,
 };
 
+const ALL_SURFACES_VISIBILITY: Record<string, boolean> = {
+  "claude-plugin": true,
+  "parcel-explore": true,
+  "parcel-installable": true,
+  "parcel-runtime": true,
+};
+
 const DELIMITER = /^---[ \t]*$/;
 const ALIAS_PATTERN = /(^|\s)[&*][A-Za-z0-9_-]+/;
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -241,6 +248,10 @@ function checkParcelMetadata(
     return;
   }
   const flags = visibility as Record<string, unknown>;
+  // A skill is external-only or on every surface; any other mix is a mistake.
+  const profile = VISIBILITY_FLAGS.every((flag) => flags[flag] === true)
+    ? ALL_SURFACES_VISIBILITY
+    : EXTERNAL_ONLY_VISIBILITY;
   for (const flag of VISIBILITY_FLAGS) {
     if (!(flag in flags)) {
       findings.push({
@@ -249,7 +260,7 @@ function checkParcelMetadata(
       });
       continue;
     }
-    if (flags[flag] !== EXTERNAL_ONLY_VISIBILITY[flag]) {
+    if (flags[flag] !== profile[flag]) {
       findings.push({
         path: reportPath,
         rule: `skill_visibility_flag_value_${toSnakeCase(flag)}`,
