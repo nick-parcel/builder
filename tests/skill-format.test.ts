@@ -1,12 +1,13 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import {
   PORTABLE_FRONTMATTER_KEYS,
   parseFrontmatter,
   readSkill,
   validateSkillDir,
 } from "../scripts/read-skill.js";
+import { cleanupTempDirs, makeTempDir } from "./helpers/spec-fixture.js";
 
 const repoRoot = path.resolve(__dirname, "..");
 const skillsRoot = path.join(repoRoot, "plugin", "skills");
@@ -178,5 +179,76 @@ describe("invalid skill fixtures", () => {
       const found = await rules(path.join(fixturesRoot, fixture));
       expect({ fixture, found }).toEqual({ fixture, found: [rule] });
     }
+  });
+});
+
+describe("visibility profiles", () => {
+  afterAll(cleanupTempDirs);
+
+  async function skillWith(flags: Record<string, boolean>): Promise<string> {
+    const dir = path.join(await makeTempDir("visibility-"), "profile-skill");
+    await fs.mkdir(dir, { recursive: true });
+    const lines = Object.entries(flags).map(
+      ([flag, on]) => `      ${flag}: ${on}`,
+    );
+    await fs.writeFile(
+      path.join(dir, "SKILL.md"),
+      [
+        "---",
+        "name: profile-skill",
+        "description: Use when exercising visibility profiles in tests.",
+        "license: Apache-2.0",
+        "compatibility: Test fixture only",
+        "metadata:",
+        "  parcel:",
+        "    schema-version: 1",
+        "    version: 0.1.0",
+        "    visibility:",
+        ...lines,
+        "---",
+        "",
+        "# Fixture skill",
+        "",
+        "Body text.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    return dir;
+  }
+
+  const flags = (
+    claude: boolean,
+    explore: boolean,
+    installable: boolean,
+    runtime: boolean,
+  ) => ({
+    "claude-plugin": claude,
+    "parcel-explore": explore,
+    "parcel-installable": installable,
+    "parcel-runtime": runtime,
+  });
+
+  it("accepts a skill on every surface", async () => {
+    expect(await rules(await skillWith(flags(true, true, true, true)))).toEqual(
+      [],
+    );
+  });
+
+  it("still accepts an external-only skill", async () => {
+    expect(
+      await rules(await skillWith(flags(true, false, false, false))),
+    ).toEqual([]);
+  });
+
+  it("rejects a partial Parcel profile", async () => {
+    const found = await rules(await skillWith(flags(true, true, false, true)));
+    expect(found).toContain("skill_visibility_flag_value_parcel_explore");
+    expect(found).toContain("skill_visibility_flag_value_parcel_runtime");
+  });
+
+  it("rejects Parcel surfaces without the plugin", async () => {
+    const found = await rules(await skillWith(flags(false, true, true, true)));
+    expect(found).toContain("skill_visibility_flag_value_claude_plugin");
   });
 });

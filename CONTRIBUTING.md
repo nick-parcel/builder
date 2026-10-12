@@ -6,6 +6,10 @@ Skill frontmatter is portable only: `name`, `description`, `license`,
 `compatibility`, `metadata`. Never `allowed-tools`, hooks, MCP manifests, or
 any host execution field. Parcel catalog data lives under `metadata.parcel`.
 
+Visibility under `metadata.parcel.visibility` is one of two profiles:
+external-only (`claude-plugin: true`, the three Parcel flags `false`) or every
+surface (all four `true`). The validator refuses any other mix.
+
 ## No secrets, no executables
 
 Never commit secrets, tokens, local paths, or executable content. This
