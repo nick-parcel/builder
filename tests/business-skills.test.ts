@@ -32,6 +32,12 @@ const CONTRACTS: Record<string, readonly string[]> = {
     "watch:",
     "not named in public filings yet",
   ],
+  "project-brief": [
+    "load the workspace's `icp` skill",
+    "unknowns",
+    "spends credits",
+    "go or no-go",
+  ],
 };
 
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
