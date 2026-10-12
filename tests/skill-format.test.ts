@@ -7,13 +7,16 @@ import {
   readSkill,
   validateSkillDir,
 } from "../scripts/read-skill.js";
+import {
+  SHIPPED_SKILLS,
+  expectedVisibility,
+} from "./helpers/shipped-skills.js";
 import { cleanupTempDirs, makeTempDir } from "./helpers/spec-fixture.js";
 
 const repoRoot = path.resolve(__dirname, "..");
 const skillsRoot = path.join(repoRoot, "plugin", "skills");
 const fixturesRoot = path.join(__dirname, "fixtures", "invalid", "skills");
 
-const SHIPPED_SKILLS = ["create-skill", "using-parcel-mcp"];
 const MAX_SKILL_BYTES = 12 * 1024;
 const MAX_NAME_CHARS = 64;
 const MAX_DESCRIPTION_CHARS = 512;
@@ -24,9 +27,9 @@ async function rules(dir: string): Promise<string[]> {
 }
 
 describe("shipped skills", () => {
-  it("ships exactly the two launch skills", async () => {
+  it("ships exactly the listed skills", async () => {
     const entries = await fs.readdir(skillsRoot);
-    expect(entries.sort()).toEqual(SHIPPED_SKILLS);
+    expect(entries.sort()).toEqual([...SHIPPED_SKILLS]);
   });
 
   for (const slug of SHIPPED_SKILLS) {
@@ -76,17 +79,12 @@ describe("shipped skills", () => {
         expect(parcel.version).toMatch(/^\d+\.\d+\.\d+$/);
       });
 
-      it("is external-only across all four visibility flags", async () => {
+      it("carries its expected visibility profile", async () => {
         const skill = await readSkill(dir);
         const parcel = (
           skill.frontmatter.metadata as Record<string, Record<string, unknown>>
         ).parcel;
-        expect(parcel.visibility).toEqual({
-          "claude-plugin": true,
-          "parcel-explore": false,
-          "parcel-installable": false,
-          "parcel-runtime": false,
-        });
+        expect(parcel.visibility).toEqual(expectedVisibility(slug));
       });
 
       it("opens with a delimiter on line 1 and uses LF endings", async () => {
