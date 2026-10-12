@@ -168,12 +168,33 @@ describe("spec artifact contract", () => {
     }
   });
 
-  it("lists the complete supporting-file inventory and bundle hashes", () => {
+  it("lists the complete supporting-file inventory and bundle hashes", async () => {
     for (const artifact of result.artifacts) {
-      expect(artifact.skill.files).toEqual([]);
-      const canonical = `${artifact.skill.skillMd.sha256}\n[]`;
+      const skillDir = path.join(
+        repoRoot,
+        "plugin",
+        "skills",
+        artifact.skill.slug,
+      );
+      const onDisk = (await listFilesRecursive(skillDir))
+        .filter((file) => file !== "SKILL.md")
+        .sort();
+      expect(artifact.skill.files.map((file) => file.path)).toEqual(onDisk);
+      const canonical = `${artifact.skill.skillMd.sha256}\n${JSON.stringify(
+        artifact.skill.files.map(
+          ({ path: filePath, mediaType, bytes, sha256 }) => ({
+            path: filePath,
+            mediaType,
+            bytes,
+            sha256,
+          }),
+        ),
+      )}`;
       expect(artifact.skill.sha256).toBe(sha256Hex(canonical));
-      expect(artifact.skill.bytes).toBe(artifact.skill.skillMd.bytes);
+      expect(artifact.skill.bytes).toBe(
+        artifact.skill.skillMd.bytes +
+          artifact.skill.files.reduce((sum, file) => sum + file.bytes, 0),
+      );
     }
   });
 
@@ -334,7 +355,7 @@ describe("builder refusals", () => {
       "SKILL.md": skillMd({ name: "Create-Skill" }),
     });
     const skills = await fs.readdir(path.join(root, "plugin", "skills"));
-    if (skills.length === 3) {
+    if (skills.length === SHIPPED_SKILLS.length + 1) {
       const error = await expectBuildError(buildFixture({ root }));
       expect(error.rule).toBe("skill_slug_case_collision");
     }

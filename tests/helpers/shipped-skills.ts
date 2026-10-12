@@ -6,7 +6,7 @@ export const EXTERNAL_ONLY_SKILLS: readonly string[] = [
   "using-parcel-mcp",
 ];
 
-export const BUSINESS_SKILLS: string[] = [];
+export const BUSINESS_SKILLS: string[] = ["build-icp"];
 
 export const SHIPPED_SKILLS: readonly string[] = [
   ...EXTERNAL_ONLY_SKILLS,
