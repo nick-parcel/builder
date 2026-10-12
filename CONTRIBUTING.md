@@ -22,7 +22,9 @@ Every file referenced from a skill or manifest must exist in the repository.
 
 ## Evals
 
-Every skill needs at least one eval case.
+Every skill needs at least one eval case. Business skills are written by
+intent rather than tool order, so their eval is a contract entry in
+`tests/business-skills.test.ts` plus live prompts in `tests/prompts/<slug>.md`.
 
 ## Review
 

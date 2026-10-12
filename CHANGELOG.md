@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-11
+
+### Added
+
+- Five Parcel business skills on every surface (Claude plugin, Parcel Explore, install, and Spec runtime): build-icp, build-prospect-list, project-brief, research-and-write-outreach, create-crm-opportunity.
+- Shared Parcel data notes carried by each business skill, and contract tests that keep the notes identical, the skills within budget, and their wording tool-agnostic.
+
+### Changed
+
+- The validator accepts a second visibility profile with all four flags on; any other mix is still refused.
+
 ## [0.2.3] - 2026-09-17
 
 ### Fixed
