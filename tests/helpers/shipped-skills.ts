@@ -11,6 +11,7 @@ export const BUSINESS_SKILLS: string[] = [
   "build-prospect-list",
   "project-brief",
   "research-and-write-outreach",
+  "create-crm-opportunity",
 ];
 
 export const SHIPPED_SKILLS: readonly string[] = [

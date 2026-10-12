@@ -44,6 +44,14 @@ const CONTRACTS: Record<string, readonly string[]> = {
     "never invent an email address",
     "150 words or fewer",
   ],
+  "create-crm-opportunity": [
+    "load the workspace's `icp` skill",
+    "never pick the account yourself",
+    "one opportunity per project",
+    "search before you create",
+    "`in-crm`",
+    "never put construction cost in the amount",
+  ],
 };
 
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
