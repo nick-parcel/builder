@@ -25,6 +25,13 @@ const CONTRACTS: Record<string, readonly string[]> = {
     "batches of up to 100",
     "approves publishing",
   ],
+  "build-prospect-list": [
+    "load the workspace's `icp` skill",
+    "priority:",
+    "secondary:",
+    "watch:",
+    "not named in public filings yet",
+  ],
 };
 
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
