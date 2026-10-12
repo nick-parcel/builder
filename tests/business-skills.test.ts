@@ -38,6 +38,12 @@ const CONTRACTS: Record<string, readonly string[]> = {
     "spends credits",
     "go or no-go",
   ],
+  "research-and-write-outreach": [
+    "load the workspace's `icp` skill",
+    "never send",
+    "never invent an email address",
+    "150 words or fewer",
+  ],
 };
 
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
