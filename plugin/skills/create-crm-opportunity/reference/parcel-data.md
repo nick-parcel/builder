@@ -6,7 +6,7 @@ Shared by every Parcel business skill. Read it once per conversation.
 
 - Projects: a development at an address. Facts include uses, residential units, gross floor area, stories, height, parking, construction cost, stage, disposition, and a description.
 - Signals: dated public events on a project, such as a site acquisition, an entitlement application, a public hearing, an approval, a permit, a construction loan, or a team update. Signals move a project forward and are the best reason to reach out now.
-- Accounts: firms. Types include developer, owner, architect, GC, engineer, consultant, law firm, and landscape architect.
+- Accounts: firms. Types are developer, architect, GC, engineer, consultant, law firm, landscape architect, agency, and other. Owner is a role a firm plays on a project, not an account type.
 - Contacts: people at accounts, linked to projects by role.
 - Project team: the accounts on a project by role (developer, owner, architect, GC, engineer, consultant), sometimes with a specific role such as structural engineer, MEP engineer, civil engineer, or architect of record.
 - The workspace layer: this workspace's own status, notes, and tags on projects, accounts, and contacts, plus each account's ICP tier and Atlas Score. Saved views and alert subscriptions also belong to the workspace.
@@ -20,7 +20,7 @@ Disposition: active, denied, withdrawn, expired, stalled, cancelled. Only active
 ## ICP tier and Atlas Score
 
 - ICP tier is set by the workspace: Tier 1, Tier 2, Tier 3, or Disqualified.
-- Atlas Score (1 to 100) measures recent development activity across an account's projects, weighted by the signal types the workspace subscribes to and their priority. Tier 1 multiplies it by 1.5, Tier 3 by 0.5, and Disqualified sets it to 0. It recomputes after tier changes.
+- Atlas Score (0 to 100) measures recent development activity across an account's projects, weighted by the signal types the workspace subscribes to and their priority. Tier 1 multiplies it by 1.5, Tier 3 by 0.5, and Disqualified sets it to 0. It is blank when the account has no subscribed signal in two years, and it recomputes after tier changes.
 
 ## Read blanks carefully
 
@@ -36,7 +36,11 @@ Disposition: active, denied, withdrawn, expired, stalled, cancelled. Only active
 
 ## Writes
 
-Every write is shown to the member for approval before it runs. Say what you are about to write and why, in one or two lines, then ask. If a write is refused, report it and stop that step; do not retry around it.
+Wait for the member's yes before every write. Say what you are about to write and why, in one or two lines, then ask. If a write is refused, report it and stop that step; do not retry around it.
+
+Notes are one text field per record, and tags are replaced as a whole set. To add a note or a tag, read the record's current notes and tags first, append yours (start a note with today's date), send the full merged value, and say that you are appending. Never send a note or tag list that drops what was already there.
+
+Workspace writes (ICP tiers, statuses, notes, tags, saved views, alerts) need the Pro plan. On another plan, say so and skip that step.
 
 ## Showing results
 

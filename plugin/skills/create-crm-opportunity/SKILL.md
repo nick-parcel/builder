@@ -42,7 +42,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
    - HubSpot: link the deal to the company, and to contacts and other firms (architect, GC) that already exist in the CRM. Do not create contacts unless the member asks.
    - Salesforce: set the account only; list other firms and named contacts in the description, because contact roles are not available here.
 6. Show exactly what will be written, then ask for approval. Every CRM write needs it.
-7. After the CRM write succeeds, offer to tag the project `in-crm` in Parcel and add a note with the CRM record's link or id and today's date, a write the member approves.
+7. After the CRM write succeeds, offer to add the `in-crm` tag to the project in Parcel and append a note with the CRM record's link or id and today's date, a write the member approves.
 8. Report what happened per project: created, updated, or skipped, with the CRM link or id.
 
 ## Rules

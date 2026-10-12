@@ -54,6 +54,45 @@ const CONTRACTS: Record<string, readonly string[]> = {
   ],
 };
 
+describe("shared data notes", () => {
+  it("teaches append-only notes and tags, and waiting for a yes", async () => {
+    const notes = await fs.readFile(CANONICAL_NOTES, "utf8");
+    expect(notes).toContain("read the record's current notes and tags first");
+    expect(notes).toContain(
+      "Never send a note or tag list that drops what was already there.",
+    );
+    expect(notes).toContain("Wait for the member's yes before every write.");
+  });
+});
+
+describe("build-icp template", () => {
+  const template = path.join(
+    skillsRoot,
+    "build-icp",
+    "reference",
+    "icp-template.md",
+  );
+
+  it("keeps the headings the other skills read by name", async () => {
+    const body = await fs.readFile(template, "utf8");
+    for (const heading of [
+      "## Who we are",
+      "## Target accounts",
+      "## Target projects",
+      "## Priority buckets",
+      "## Why-now signals",
+      "## Outreach voice",
+      "## CRM defaults",
+    ]) {
+      expect(body).toContain(heading);
+    }
+  });
+
+  it("names intents, not tool names", async () => {
+    expect(await fs.readFile(template, "utf8")).not.toMatch(TOOL_NAME);
+  });
+});
+
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
   const dir = path.join(skillsRoot, slug);
   const read = (file: string) => fs.readFile(path.join(dir, file), "utf8");

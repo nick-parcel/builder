@@ -51,4 +51,4 @@ Use these sections, in this order:
 - Talking points.
 - Unknowns.
 
-Keep it to one screen where possible. Nothing is written by default. Offer to save a short note on the project (a write the member approves), to draft outreach with the research-and-write-outreach skill, or to log the project with the create-crm-opportunity skill.
+Keep it to one screen where possible. Nothing is written by default. Offer to append a short note to the project (a write the member approves), to draft outreach with the research-and-write-outreach skill, or to log the project with the create-crm-opportunity skill.

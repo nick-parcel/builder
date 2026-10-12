@@ -41,7 +41,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
    - nothing the data does not support: no invented relationships, awards, or project details.
    Offer two follow-up touches on request, each shorter and each with a new reason to write.
 6. Show the draft in the chat. Offer to save it as a draft in the member's connected mailbox, a write the member approves. Never send email, even when a send action is available; sending stays with the member.
-7. For a batch from a prospect list, draft up to 10 emails, one per recipient, each with its own dated hook. Offer to add a note reading "outreach drafted" with today's date on each account or project, a write the member approves.
+7. For a batch from a prospect list, draft up to 10 emails, one per recipient, each with its own dated hook. Offer to append a note reading "outreach drafted" with today's date to each account or project, a write the member approves.
 
 ## Style
 
