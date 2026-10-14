@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-13
+
+### Changed
+
+- The shared data notes count stalled projects as prospects, ranked behind active ones. Stalled only means no new filing for 18 months before a permit, and most stalled projects are approved or under review. Denied, withdrawn, expired, and cancelled projects are still not prospects.
+- build-prospect-list pulls active and stalled candidates, reads disposition, puts active ahead of stalled within each bucket, and shows disposition in its project table. research-and-write-outreach researches an account's active and stalled projects.
+
+### Fixed
+
+- build-icp no longer offers a saved view "of active projects": a view cannot filter by disposition, so the offer now says the view also lists closed projects.
+
 ## [0.3.0] - 2026-10-12
 
 ### Added

@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel with the skill
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.0
+    version: 0.3.1
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -48,7 +48,7 @@ Check that you can save a skill where you are running: drafting a skill has to b
    - Tier 3: in our markets but outside the core profile.
    - Disqualified: excluded accounts and competitors.
    Show the proposal as a table. Write the tiers the member approves, in batches of up to 100 accounts per write. Leave accounts the member did not approve untouched. Mention that Atlas Scores recompute after the write.
-7. Offer alerts and a view. Offer alert subscriptions for the why-now signal types at their priorities (high, medium, low), and a saved view of active projects that fit the target projects section. Each is its own write and its own approval. Both are optional.
+7. Offer alerts and a view. Offer alert subscriptions for the why-now signal types at their priorities (high, medium, low), and a saved view of projects that fit the target projects section. A view cannot filter by disposition, so say it also lists closed projects. Each is its own write and its own approval. Both are optional.
 8. Close with what changed: the `icp` skill saved or updated, how many tiers were written, and which alerts and views were created.
 
 ## Good profiles

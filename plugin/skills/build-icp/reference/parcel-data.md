@@ -15,7 +15,7 @@ Shared by every Parcel business skill. Read it once per conversation.
 
 Stage, in order: pre-filing, filed, under review, approved, permitted, under construction, completed. Earlier stages mean the design team may still be open.
 
-Disposition: active, denied, withdrawn, expired, stalled, cancelled. Only active projects are prospects.
+Disposition: active, denied, withdrawn, expired, stalled, cancelled. Active and stalled projects are prospects. Stalled only means no new filing for 18 months before a permit; most stalled projects are approved or under review and can still move. Rank active ahead of stalled at equal fit, and say which each one is. Denied, withdrawn, expired, and cancelled projects are not prospects.
 
 ## ICP tier and Atlas Score
 

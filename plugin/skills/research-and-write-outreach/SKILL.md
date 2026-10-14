@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.0
+    version: 0.3.1
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -27,7 +27,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 1. Resolve who and what: the account, the project or projects, and the recipient. If no recipient is named, list the named contacts on that account and project with their roles and ask which. Never invent an email address. If the chosen contact has no email in Parcel, draft anyway and say the address is unknown.
 2. Load the workspace's `icp` skill for the sender, tone, proof points, and phrases to avoid. Without it, ask for the sender's name and title and one proof point.
 3. Research:
-   - the account's active projects that fit the ICP, with stage;
+   - the account's active and stalled projects that fit the ICP, with stage and disposition;
    - the latest dated signals on those projects, which become the reason to write now;
    - who the account usually hires in our discipline, from the team roles on its projects;
    - our history: this workspace's status and notes on the account and its projects, plus CRM records and past email threads with the account's domain when those are connected (read only).
