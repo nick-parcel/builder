@@ -66,6 +66,17 @@ describe("shared data notes", () => {
     );
     expect(notes).toContain("Wait for the member's yes before every write.");
   });
+
+  it("counts stalled projects as prospects, ranked behind active ones", async () => {
+    // Stalled is derived from filing silence alone, and most stalled projects are approved or under review.
+    const notes = await fs.readFile(CANONICAL_NOTES, "utf8");
+    expect(notes).toContain("Active and stalled projects are prospects.");
+    expect(notes).toContain("Rank active ahead of stalled");
+    expect(notes).toContain(
+      "Denied, withdrawn, expired, and cancelled projects are not prospects.",
+    );
+    expect(notes).not.toContain("Only active projects are prospects.");
+  });
 });
 
 describe("build-icp template", () => {
@@ -120,6 +131,10 @@ describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
     for (const file of ["SKILL.md", "reference/parcel-data.md"]) {
       expect(await read(file)).not.toMatch(TOOL_NAME);
     }
+  });
+
+  it("does not narrow prospects to active projects", async () => {
+    expect(await read("SKILL.md")).not.toMatch(/\bactive projects\b/i);
   });
 
   it("uses the product's vocabulary", async () => {
