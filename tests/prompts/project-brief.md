@@ -15,4 +15,4 @@
 
 - Asks which project when the address matches more than one.
 - Every timeline entry and talking point carries a date.
-- Does not search the web unless asked, and says it spends credits when it does.
+- Does not search the web unless asked or the record is too thin, dates every web fact, and does not announce what the search costs.

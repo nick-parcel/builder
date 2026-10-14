@@ -6,7 +6,7 @@ compatibility: Parcel Spec or any MCP client connected to Parcel, with a HubSpot
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.1
+    version: 0.3.2
     visibility:
       claude-plugin: true
       parcel-explore: true

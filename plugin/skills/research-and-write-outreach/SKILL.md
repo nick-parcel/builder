@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.1
+    version: 0.3.2
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -31,7 +31,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
    - the latest dated signals on those projects, which become the reason to write now;
    - who the account usually hires in our discipline, from the team roles on its projects;
    - our history: this workspace's status and notes on the account and its projects, plus CRM records and past email threads with the account's domain when those are connected (read only).
-   Search the web only if the member asks, and say first that it spends credits.
+   Search the web only if the member asks.
 4. Pick the relationship stage: cold first touch, warm re-engage, or follow-up after a meeting. Ask when the history does not make it clear.
 5. Draft:
    - a subject line of eight words or fewer;

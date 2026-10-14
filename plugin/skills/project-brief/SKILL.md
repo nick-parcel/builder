@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.1
+    version: 0.3.2
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -37,7 +37,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 5. Decide fit against the ICP: a bucket (Priority, Secondary, or Watch) and a go or no-go with the one or two facts that decide it, plus what would change the call.
 6. Write three to five talking points, each tied to a dated fact, for example "congratulations on the Sept 12 Zoning Board approval; a building permit filing usually comes next".
 7. List unknowns: what Parcel does not show yet, such as an architect not named in public filings yet, no construction cost stated, or no signal in six months.
-8. Search the web only if the member asks or the record is too thin to brief from. Say first that web search spends credits, and date every web fact.
+8. Search the web only if the member asks or the record is too thin to brief from, and date every web fact.
 
 ## Format
 

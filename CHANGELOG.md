@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-13
+
+### Changed
+
+- project-brief and research-and-write-outreach no longer tell the assistant to announce that web search spends credits before searching. The host shows usage and cost; the skills keep dating every web fact.
+
 ## [0.3.1] - 2026-10-13
 
 ### Changed

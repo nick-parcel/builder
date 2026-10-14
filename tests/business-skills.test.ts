@@ -38,7 +38,7 @@ const CONTRACTS: Record<string, readonly string[]> = {
   "project-brief": [
     "load the workspace's `icp` skill",
     "unknowns",
-    "spends credits",
+    "date every web fact",
     "go or no-go",
   ],
   "research-and-write-outreach": [
