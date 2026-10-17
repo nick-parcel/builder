@@ -51,7 +51,7 @@ Work with the identifiers the server gave you in an earlier response. If you do 
 | `search_fields`, `get_fields`, `workspace_get_info`, `workspace_get_credits` | Schema and account context | no credits |
 | `workspace_*` reads and writes | This member's own workspace book, Views, subscriptions, members, invitations | no credits for reads |
 
-Global reads spend the workspace's credits, so say what a broad search will cost before you run it and prefer a narrow filter. Workspace writes change the person's own records, so name the record and the field you are about to change before you call the tool. Destructive deletes and membership changes are not offered to MCP clients at all; when someone asks for one, say it belongs in the Parcel app.
+Global reads spend the workspace's credits, so say what a broad search will cost before you run it and prefer a narrow filter. Workspace writes change the person's own records, so name the record and the field you are about to change before you call the tool. Deleting workspace records and changing membership are not offered to MCP clients at all; when someone asks for one, say it belongs in the Parcel app. Skills and knowledge pages are the exception: `manage_skill` deletes a skill and `manage_knowledge` archives a page, each after the person approves that call.
 
 ## Skills and knowledge
 

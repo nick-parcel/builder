@@ -4,8 +4,6 @@ This is the body of the knowledge page Go-to-market/ICP.
 
 Write the page in exactly this shape. Keep the headings and their order: the other Parcel skills read them by name. Fill every section from the evidence and the interview; write "Not set" rather than deleting a section.
 
-    # Our ICP
-
     ## Who we are
     - Firm:
     - Service lines:

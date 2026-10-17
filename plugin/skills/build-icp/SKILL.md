@@ -30,7 +30,7 @@ Save in this conversation. If this conversation cannot write knowledge, say so b
 
 ## Workflow
 
-1. Check for an existing profile. Look in the workspace's knowledge for the ICP page (Go-to-market/ICP). If it exists, read it and treat this run as an update: change only what the member wants changed.
+1. Check for an existing profile. Look in the workspace's knowledge for the ICP page (Go-to-market/ICP). If it exists, read it and treat this run as an update: change only what the member wants changed. If there is no page but the workspace still has a skill named icp, read that skill and start from its profile.
 2. Gather evidence before asking anything. Read what the workspace already shows:
    - accounts that already carry an ICP tier, and their types;
    - projects with a workspace status, notes, or tags, and their cities, uses, sizes, and stages;
