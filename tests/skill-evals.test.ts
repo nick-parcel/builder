@@ -31,10 +31,10 @@ const MCP_EXPECTED_ORDER = [
 ];
 const AUTHORING_EXPECTED_ORDER = [
   "find_skill",
-  "create_skill",
+  "manage_skill:create",
   "get_skill",
-  "update_skill",
-  "publish_skill",
+  "manage_skill:update",
+  "manage_skill:publish",
 ];
 
 async function bodyOf(slug: string): Promise<string> {
@@ -199,7 +199,7 @@ describe("create-skill eval", () => {
       createMockServer({ scenario: "member-with-skill-scopes", approvals: [] }),
     );
     expect(withoutApproval.entries.map((e) => e.tool)).not.toContain(
-      "publish_skill",
+      "manage_skill:publish",
     );
 
     const baselineRun = runPolicy(
@@ -231,7 +231,7 @@ describe("create-skill eval", () => {
     const { skilled, baseline } = authoringPolicies(body);
     const server = createMockServer({
       scenario: "member-with-skill-scopes",
-      approvals: ["publish_skill"],
+      approvals: ["manage_skill:publish"],
     });
     const skilledRun = runPolicy(skilled, server);
     expect(skilledRun.entries.map((e) => e.outcome)).toContain(
@@ -271,7 +271,7 @@ describe("transcript recorder", () => {
       for (const policy of policies) {
         const transcript = runPolicy(
           policy,
-          createMockServer({ scenario, approvals: ["publish_skill"] }),
+          createMockServer({ scenario, approvals: ["manage_skill:publish"] }),
         );
         expect(transcript.entries.length).toBeLessThanOrEqual(
           MAX_TRANSCRIPT_ENTRIES,
