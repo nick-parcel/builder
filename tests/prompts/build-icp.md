@@ -1,6 +1,6 @@
 # build-icp live prompts
 
-Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the plugin and Parcel MCP connected.
+Run each in Spec (from Explore, Set up or Update ICP on Build ICP, or any chat) and in Claude Code with the plugin and Parcel MCP connected.
 
 ## Should trigger
 
@@ -15,7 +15,6 @@ Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the
 
 ## Behavior checks
 
-- In an ordinary Spec chat, says it cannot save a skill there and points to Set up before asking anything.
 - Reads workspace evidence and summarizes it before the first question.
 - Asks no more than three rounds of questions, each with a recommended answer.
 - Creates or edits the knowledge page Go-to-market/ICP, with the member's approval, and reads it back; an update edits only the sections that changed.

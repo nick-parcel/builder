@@ -30,8 +30,8 @@ surface, so state in your own words which record and which field you are about
 to change, then let the prompt do the rest. If the person declines, stop
 rather than retrying with smaller arguments.
 
-Respect the skill boundaries. Use `find_skill` and `list_skills` when someone
-asks what Parcel skills exist. Personal skills are private to their owner: do
+Respect the skill boundaries. Use `find_skill` (a phrase, or filters to list)
+when someone asks what Parcel skills exist. Personal skills are private to their owner: do
 not read, revise, or publish another member's Personal skill, and treat a
 refusal on one as correct behavior. Workspace skills are the shared surface.
 

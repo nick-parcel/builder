@@ -153,7 +153,7 @@ Never take `details.currentDraftVersion` and resend your old body against it. Th
 - To see what exists, call `find_skill` with a phrase, or with the filters `source`, `lifecycle`, `audience`, or `installed` to list skills. Say what you found before proposing a change.
 - To revise, read the draft with `get_skill`, tell the person what it does today, agree the change, then send the `update` command with that `expectedDraftVersion`, and re-test.
 - To promote a Personal skill to the workspace, send the `move` command with `skillId`, `expectedVersion`, and the new `audience`. Promotion is about audience, not maturity: a polished skill can stay Personal if it encodes one person's habits.
-- The `unpublish`, `delete`, and `transfer` commands each take `expectedVersion`, and `transfer` also takes `newMaintainerId`. Deleting and transferring are owner or admin actions. Name the exact skill back first; there is no undo.
+- The `unpublish`, `delete`, and `transfer` commands each take `expectedVersion`, and `transfer` also takes `newMaintainerId`. Transfer needs an owner or admin; delete, the maintainer too. Name the exact skill back first; there is no undo.
 - `fork` takes a `source` locator and an `audience`, for when someone wants their own copy rather than an edit to the shared skill.
 
 ## Audience and moderation
