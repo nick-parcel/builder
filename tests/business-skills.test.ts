@@ -21,7 +21,7 @@ const TOOL_NAME =
 const CONTRACTS: Record<string, readonly string[]> = {
   "build-icp": [
     "the icp page (go-to-market/icp)",
-    "the workspace's knowledge",
+    "the icp page in the workspace's knowledge (go-to-market/icp)",
     "batches of up to 100",
     "say so before asking anything",
     "edit only the sections that changed",

@@ -40,7 +40,7 @@ Save in this conversation. If this conversation cannot write knowledge, say so b
    Summarize the pattern in a few lines, for example "your tracked projects are mostly 4 to 7 story residential in Somerville and Cambridge, at filed or under review".
 3. Interview. Ask at most three rounds of up to four questions, each with a recommended answer drawn from the evidence. Skip anything the evidence already answers. Cover, in this order: who we are and who usually hires us; target projects; target accounts and competitors; priority buckets and why-now signals; outreach voice; CRM defaults. CRM defaults are optional; leave them "Not set" if the member wants to move on.
 4. Draft the profile in the template's shape and show it in full. Take edits until the member is happy.
-5. Save the profile as the knowledge page ICP in the Go-to-market folder: create it, or edit only the sections that changed. Knowledge is shared, so every member and every Parcel skill reads the same profile. Parcel shows the member the change to approve before it is written. Read the page back after saving. If the page changed since you read it, read it again and reapply only the member's edits.
+5. Save the profile as the knowledge page ICP in the Go-to-market folder: create it, or edit only the sections that changed. Knowledge is shared, so every member and every Parcel skill reads the same profile. In Parcel the member approves the change on a card before it is written; in another assistant, name the page and the change before you save. Read the page back after saving. If the page changed since you read it, read it again and reapply only the member's edits.
 6. Propose ICP tiers. Find accounts active in the target markets over the last two years whose type and projects fit the profile. Rank them, take the top 100 plus every named target and every excluded account, and propose a tier for each with a one-line reason:
    - Tier 1: named targets, and accounts whose recent projects fit on market, use, size, and stage.
    - Tier 2: fit on most of those.
@@ -61,4 +61,4 @@ Save in this conversation. If this conversation cannot write knowledge, say so b
 
 - Do not invent evidence. If the workspace has no tiers, statuses, or views yet, say so and rely on the interview.
 - Do not tier accounts the profile does not cover.
-- Do not write the firm's criteria anywhere but the workspace's knowledge.
+- Do not write the firm's criteria anywhere but the ICP page in the workspace's knowledge (Go-to-market/ICP).
