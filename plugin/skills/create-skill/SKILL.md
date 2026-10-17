@@ -6,7 +6,7 @@ compatibility: Any MCP client connected to Parcel with the skills read and write
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: false
@@ -42,13 +42,13 @@ A skill written from guesses fails quietly. Collect all five, in the person's wo
 
 ## Workflow
 
-1. Call `find_skill` with the person's own words, and `list_skills` to see what the workspace has. If a close match exists, propose revising it. Two skills that trigger on the same situation both lose.
-2. Confirm the audience, then call `create_skill` with `audience` and a portable bundle. Personal keeps it private to its owner; Workspace opens it to every active member. Ask; do not infer from tone.
+1. Call `find_skill` with the person's own words, then with no query to list the workspace's skills. If a close match exists, propose revising it. Two skills that trigger on the same situation both lose.
+2. Confirm the audience, then call `manage_skill` with the `create` command, `audience`, and a portable bundle. Personal keeps it private to its owner; Workspace opens it to every active member. Ask; do not infer from tone.
 3. Call `get_skill` to read the stored source and the current `draftVersion`. It takes a `locator`, never a bare id, and needs `view: "draft"` or it returns the published revision instead. Read what Parcel stored, not what you meant to send.
-4. Run the test prompts, show the person what came out, and fold their feedback into a revision with `update_skill`, carrying the `expectedDraftVersion` you read.
-5. Stop and ask for approval to publish. When the person approves that specific call, and only then, call `publish_skill` with the current `expectedDraftVersion`.
+4. Run the test prompts, show the person what came out, and fold their feedback into an `update` command, carrying the `expectedDraftVersion` you read.
+5. Stop and ask for approval to publish. When the person approves that specific call, and only then, send the `publish` command with the current `expectedDraftVersion`.
 
-Every write takes an `idempotencyKey`. Generate a fresh one per logical write, and reuse it only when retrying that write.
+Every write is a `manage_skill` command with an `idempotencyKey`: fresh per logical write, reused only to retry it.
 
 ## Bundle shape
 
@@ -60,8 +60,9 @@ A minimal create call:
 
 ```json
 {
-  "name": "create_skill",
+  "name": "manage_skill",
   "arguments": {
+    "command": "create",
     "audience": "workspace",
     "idempotencyKey": "<unique-key>",
     "bundle": {
@@ -88,7 +89,7 @@ Read the draft back:
 }
 ```
 
-The `draftVersion` in that response is the exact value to send as `expectedDraftVersion` on the next `update_skill` or `publish_skill`. To read a supporting file instead of SKILL.md, call `get_skill_file` with the same locator plus `path`.
+The `draftVersion` in that response is the exact value to send as `expectedDraftVersion` on the next update or publish. To read a supporting file instead of SKILL.md, call `get_skill` with the same locator plus `path`.
 
 ## Write the description
 
@@ -121,13 +122,13 @@ Keep SKILL.md short and push detail into supporting files, which the bundle form
 
 Propose two or three prompts a real member would type, and check them with the person before running anything. Then walk each one through the draft as if you were meeting the skill for the first time, and show the real result in the conversation, not a summary of it. Ask: how does this look, what would you change.
 
-Generalize from what comes back. The feedback is about one case; the skill has to hold for many. Patching that single case produces a skill that works once, so ask what the correction is an instance of and write that. Cut instructions that did not earn their place, especially ones that sent you doing work nobody wanted. Send the revision with `update_skill` and run the prompts again.
+Generalize from what comes back. The feedback is about one case; the skill has to hold for many. Patching that single case produces a skill that works once, so ask what the correction is an instance of and write that. Cut instructions that did not earn their place, especially ones that sent you doing work nobody wanted. Send the revision as an `update` command and run the prompts again.
 
 Stop when the person is happy, the feedback comes back empty, or the revisions stop changing anything.
 
 ## Revising without overwriting
 
-`update_skill` and `publish_skill` both take `expectedDraftVersion`. If someone edited the draft since your last read, Parcel answers `revision_conflict` with reason `stale_draft_version` and `details.currentDraftVersion`.
+The `update` and `publish` commands both take `expectedDraftVersion`. If someone edited the draft since your last read, Parcel answers `revision_conflict` with reason `stale_draft_version` and `details.currentDraftVersion`.
 
 ```json
 {
@@ -143,17 +144,17 @@ Recover in this order, always:
 
 1. Call `get_skill` again and read the current draft.
 2. Tell the person what changed underneath you.
-3. Reapply your edit on top of the new text and call `update_skill` with the version Parcel just reported.
+3. Reapply your edit on top of the new text and send `update` with the version Parcel just reported.
 
 Never take `details.currentDraftVersion` and resend your old body against it. That silently overwrites someone else's work.
 
 ## Managing existing skills
 
-- To see what exists, call `list_skills`, which filters on `source`, `lifecycle`, `audience`, and `installed`, and `find_skill` for a phrase search. Say what you found before proposing a change.
-- To revise, read the draft with `get_skill`, tell the person what it does today, agree the change, then send `update_skill` with that `expectedDraftVersion`, and re-test.
-- To promote a Personal skill to the workspace, call `move_skill` with `skillId`, `expectedVersion`, and the new `audience`. Promotion is about audience, not maturity: a polished skill can stay Personal if it encodes one person's habits.
-- `unpublish_skill`, `delete_skill`, and `transfer_skill` each take `expectedVersion`, and `transfer_skill` also takes `newMaintainerId`. Deleting and transferring are owner or admin actions. Name the exact skill back first; there is no undo.
-- `fork_skill` takes a `source` locator and an `audience`, for when someone wants their own copy rather than an edit to the shared skill.
+- To see what exists, call `find_skill` with a phrase, or with the filters `source`, `lifecycle`, `audience`, or `installed` to list skills. Say what you found before proposing a change.
+- To revise, read the draft with `get_skill`, tell the person what it does today, agree the change, then send the `update` command with that `expectedDraftVersion`, and re-test.
+- To promote a Personal skill to the workspace, send the `move` command with `skillId`, `expectedVersion`, and the new `audience`. Promotion is about audience, not maturity: a polished skill can stay Personal if it encodes one person's habits.
+- The `unpublish`, `delete`, and `transfer` commands each take `expectedVersion`, and `transfer` also takes `newMaintainerId`. Transfer needs an owner or admin; delete, the maintainer too. Name the exact skill back first; there is no undo.
+- `fork` takes a `source` locator and an `audience`, for when someone wants their own copy rather than an edit to the shared skill.
 
 ## Audience and moderation
 
@@ -178,7 +179,7 @@ Validation reasons describe the rule, not your content. Fix the bundle rather th
 
 ## Red flags
 
-- Calling `publish_skill` because the draft looks finished. Publishing needs the person's approval of that call.
+- Sending the `publish` command because the draft looks finished. Publishing needs the person's approval of that call.
 - Resending a body after a conflict without re-reading the draft.
 - Rewriting the description narrower because one prompt over-triggered, without re-running the other prompts to see what the narrowing broke.
 - Writing header keys the portable format does not allow, then wondering why validation fails.

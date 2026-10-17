@@ -6,7 +6,7 @@ compatibility: Any MCP client that can connect to a remote HTTP MCP server and c
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: false
@@ -51,7 +51,12 @@ Work with the identifiers the server gave you in an earlier response. If you do 
 | `search_fields`, `get_fields`, `workspace_get_info`, `workspace_get_credits` | Schema and account context | no credits |
 | `workspace_*` reads and writes | This member's own workspace book, Views, subscriptions, members, invitations | no credits for reads |
 
-Global reads spend the workspace's credits, so say what a broad search will cost before you run it and prefer a narrow filter. Workspace writes change the person's own records, so name the record and the field you are about to change before you call the tool. Destructive deletes and membership changes are not offered to MCP clients at all; when someone asks for one, say it belongs in the Parcel app.
+Global reads spend the workspace's credits, so say what a broad search will cost before you run it and prefer a narrow filter. Workspace writes change the person's own records, so name the record and the field you are about to change before you call the tool. Deleting workspace records and changing membership are not offered to MCP clients at all; when someone asks for one, say it belongs in the Parcel app. Skills and knowledge pages are the exception: `manage_skill` deletes a skill and `manage_knowledge` archives a page, each after the person approves that call.
+
+## Skills and knowledge
+
+- Skills are three tools: `find_skill` (a phrase is a ranked search; filters list skills), `get_skill` (one skill, or one file inside it with `path`), and `manage_skill` (create, update, publish, unpublish, delete, transfer, move, fork, install, or uninstall, chosen by `command`). For authoring a skill, use `/builder:create-skill`.
+- Knowledge is the workspace's own pages about the firm, such as its ICP, positioning, and proof points. `find_knowledge` takes 1 to 4 phrasings, or none for the page tree; `get_knowledge` reads a page, a section, or an attached file; `manage_knowledge` creates a page, edits by `str_replace`, inserts after a heading, replaces, moves, deletes (archives), or restores. Edits need the page's current revision, so read the page before changing it.
 
 ## Approvals
 
@@ -72,6 +77,7 @@ Report the refusal in plain language, say what would fix it, and stop. Do not re
 | Plan refusal | The workspace is not on the Pro plan | The plan gates the whole MCP surface; upgrading is the person's call |
 | 401 or `unauthorized` mid-session | The grant expired or was revoked | Reconnect through the host, then retry once |
 | Skill tools absent on an older grant | The grant predates skill scopes | Reconnect so `skills:read` and `skills:write` are included |
+| Knowledge tools absent | The grant does not carry the knowledge scopes | Reconnect so `knowledge:read` and `knowledge:write` are included |
 
 Say "this grant cannot do that" and stop. Guessing an id, retrying in a loop, or telling the person a refusal is a bug is worse than the refusal.
 

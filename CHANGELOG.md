@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-17
+
+### Changed
+
+- The firm's ICP lives in the workspace's knowledge as the page ICP in the Go-to-market folder, not in a workspace skill named icp. build-icp creates or edits that page (Parcel shows the change to approve) and still proposes ICP tiers, alert subscriptions, and a view. build-prospect-list, project-brief, research-and-write-outreach, and create-crm-opportunity read the page, and outreach also reads knowledge about positioning, proof points, and messaging.
+- create-skill and using-parcel-mcp use Parcel's three skill tools: `find_skill` (a phrase is a ranked search, filters list skills), `get_skill` (a file with `path`), and `manage_skill` (every write, chosen by `command`). using-parcel-mcp describes the knowledge tools.
+
 ## [0.3.2] - 2026-10-13
 
 ### Changed

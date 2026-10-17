@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -25,7 +25,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 ## Workflow
 
 1. Resolve the project from the address, name, or record the member gives. If several match, ask which one, listing address, city, and stage for each.
-2. Load the workspace's `icp` skill if there is one, for fit and for our discipline.
+2. Read the firm's ICP page in knowledge (Go-to-market/ICP), if there is one, for fit and for our discipline.
 3. Pull the record:
    - facts: uses, units, gross floor area, stories, height, parking, construction cost, stage, disposition, description;
    - every signal, oldest first, with its date and source document;

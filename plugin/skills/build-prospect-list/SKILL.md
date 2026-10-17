@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -24,7 +24,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 
 ## Workflow
 
-1. Load the workspace's `icp` skill. If there is none, ask for the minimum in one round (markets, uses, size range, stage window, who usually hires us), each with a recommended answer, and suggest the build-icp skill afterwards so the next list needs no questions.
+1. Read the firm's ICP page in knowledge (Go-to-market/ICP), plus any other knowledge pages about who the firm targets. If there is none, ask for the minimum in one round (markets, uses, size range, stage window, who usually hires us), each with a recommended answer, and suggest the build-icp skill afterwards so the next list needs no questions.
 2. Confirm scope only if the request leaves it open: market, use, time window (default: signals in the last 90 days), and list size (default: 25 projects).
 3. Pull candidates: active and stalled projects in the target markets whose use, size, and stage fit the profile. Read only the fields you need: address, city, uses, units, gross floor area, stories, construction cost, stage, disposition, latest signal and its date, and the team by role.
 4. Remove disqualifiers: a firm in our discipline already named on the team, a completed project, a denied, withdrawn, expired, or cancelled one, and anything the profile's disqualifiers list.

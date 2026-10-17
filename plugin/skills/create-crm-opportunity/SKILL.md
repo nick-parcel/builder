@@ -6,7 +6,7 @@ compatibility: Parcel Spec or any MCP client connected to Parcel, with a HubSpot
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -25,7 +25,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 ## Before you start
 
 - A HubSpot or Salesforce connection must be available where you are running. If neither is connected, say so, tell the member they can connect one under Connectors, and stop.
-- Load the workspace's `icp` skill for the CRM defaults: pipeline, starting stage, close-date offset, fee percentage, and owner.
+- Read the CRM defaults section of the firm's ICP page in knowledge (Go-to-market/ICP): pipeline, starting stage, close-date offset, fee percentage, and owner.
 
 ## Workflow
 
@@ -50,4 +50,4 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 - One opportunity per project, under one account. An account may hold many.
 - Never move an existing opportunity to a different account unless the member asks.
 - If a CRM write fails, show the error in plain words and stop that project; do not retry with guessed values.
-- When CRM defaults were asked for in this run, suggest saving them in the ICP with Update ICP so the next run does not ask.
+- When CRM defaults were asked for in this run, suggest adding them to the ICP page's CRM defaults section so the next run does not ask.

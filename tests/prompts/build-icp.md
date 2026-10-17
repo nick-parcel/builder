@@ -1,6 +1,6 @@
 # build-icp live prompts
 
-Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the plugin and Parcel MCP connected.
+Run each in Spec (from Explore, Set up or Update ICP on Build ICP, or any chat) and in Claude Code with the plugin and Parcel MCP connected.
 
 ## Should trigger
 
@@ -15,9 +15,8 @@ Run each in Spec (from Explore, Set up on Build ICP) and in Claude Code with the
 
 ## Behavior checks
 
-- In an ordinary Spec chat, says it cannot save a skill there and points to Set up before asking anything.
 - Reads workspace evidence and summarizes it before the first question.
 - Asks no more than three rounds of questions, each with a recommended answer.
-- Leaves a ready-to-publish `icp` draft in Spec (published from the draft card); over MCP, publishes only after approval.
+- Creates or edits the knowledge page Go-to-market/ICP, with the member's approval, and reads it back; an update edits only the sections that changed.
 - Proposes tiers in a table and writes them only after approval, in batches of 100 or fewer.
-- When another member holds an unpublished `icp` draft, reports the taken name and stops instead of saving a second profile.
+- When this conversation cannot write knowledge, says so before asking anything and hands over the finished profile to paste.

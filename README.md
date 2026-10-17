@@ -66,7 +66,7 @@ an authorization error, reconnect through your client's own MCP settings.
 | --- | --- |
 | `/builder:using-parcel-mcp` | Connect to Parcel, discover which tools and scope groups the grant carries, search Parcel data, read or update workspace records, and explain a refusal honestly. |
 | `/builder:create-skill` | Author, test, revise, and publish a Parcel skill through Parcel's MCP skill tools, including description triggering, the Personal or Workspace audience choice, and revision conflicts. |
-| `/builder:build-icp` | Set up or update the firm's ICP, save it as the workspace's own `icp` skill, set ICP tiers on accounts, and offer matching alerts. |
+| `/builder:build-icp` | Set up or update the firm's ICP, save it as the knowledge page ICP in the Go-to-market folder, set ICP tiers on accounts, and offer matching alerts. |
 | `/builder:build-prospect-list` | Rank active projects and the accounts behind them into Priority, Secondary, and Watch, with a reason and the unknowns for every row. |
 | `/builder:project-brief` | Brief one project: stage, dated timeline, team and open seats, the players and who they hire, ICP fit with a go or no-go, and talking points. |
 | `/builder:research-and-write-outreach` | Research an account and its projects, then draft a short email anchored on a dated public signal. Never sends. |
@@ -101,7 +101,7 @@ conflict by re-reading the draft instead of overwriting someone else's edit.
 
 Picks up when you want to define or update who the firm targets. It reads what
 your workspace already shows, asks at most three rounds of questions with a
-recommended answer each, saves the profile as a Workspace skill named `icp`
+recommended answer each, saves the profile as the knowledge page Go-to-market/ICP
 after you approve, and offers ICP tiers and alerts as separate approved writes.
 
 ```
@@ -110,7 +110,7 @@ after you approve, and offers ICP tiers and alerts as separate approved writes.
 
 ### `/builder:build-prospect-list`
 
-Picks up when you ask who to focus on. It loads your `icp` skill, pulls active
+Picks up when you ask who to focus on. It reads your ICP page in knowledge, pulls active
 projects that fit, drops the ones whose seat is already filled, and sorts the
 rest into Priority, Secondary, and Watch with a dated reason per row and the
 client account behind each project.

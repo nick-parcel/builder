@@ -1,5 +1,5 @@
 // The skills plugin/skills ships, split by visibility profile; later tasks append business slugs.
-export const PLUGIN_VERSION = "0.3.2";
+export const PLUGIN_VERSION = "0.4.0";
 
 export const EXTERNAL_ONLY_SKILLS: readonly string[] = [
   "create-skill",

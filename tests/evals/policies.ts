@@ -53,7 +53,11 @@ export function runPolicy(policy: Policy, server: MockServer): Transcript {
     call(tool, args = {}) {
       const result = server.call(tool, args);
       const entry: TranscriptEntry = {
-        tool,
+        // A manage_skill call is recorded as its command, so the order still reads step by step.
+        tool:
+          tool === "manage_skill"
+            ? `manage_skill:${String(args.command)}`
+            : tool,
         outcome: result.outcome,
         argsFingerprint: fingerprint(args),
       };
@@ -68,6 +72,13 @@ export function runPolicy(policy: Policy, server: MockServer): Transcript {
   return { entries };
 }
 
+// The text names manage_skill's commands on their own (`create`); the transcript records them as manage_skill:create.
+const STEP_ALIASES: Readonly<Record<string, string>> = {
+  create: "manage_skill:create",
+  update: "manage_skill:update",
+  publish: "manage_skill:publish",
+};
+
 // Couples the skilled policy to the shipped text: ordered list items name the tools in order.
 export function documentedSteps(
   body: string,
@@ -79,7 +90,7 @@ export function documentedSteps(
       continue;
     }
     for (const match of line.matchAll(/`([^`]+)`/g)) {
-      const token = match[1];
+      const token = STEP_ALIASES[match[1]] ?? match[1];
       if (registry.includes(token) && !steps.includes(token)) {
         steps.push(token);
       }
@@ -97,10 +108,10 @@ export const MCP_TOOL_REGISTRY = [
 
 export const AUTHORING_TOOL_REGISTRY = [
   "find_skill",
-  "create_skill",
+  "manage_skill:create",
   "get_skill",
-  "update_skill",
-  "publish_skill",
+  "manage_skill:update",
+  "manage_skill:publish",
 ] as const;
 
 function resultOf(response: Record<string, unknown>): Record<string, unknown> {
@@ -187,12 +198,14 @@ export function authoringPolicies(skillBody: string): {
     name: "baseline",
     run(ctx) {
       // Skips discovery, sends an invalid bundle, overwrites on conflict, publishes unasked.
-      ctx.call("create_skill", {
+      ctx.call("manage_skill", {
+        command: "create",
         audience: "personal",
         bundle: INVALID_BUNDLE,
         idempotencyKey: "k1",
       });
-      const created = ctx.call("create_skill", {
+      const created = ctx.call("manage_skill", {
+        command: "create",
         audience: "personal",
         bundle: VALID_BUNDLE,
         idempotencyKey: "k1",
@@ -201,14 +214,16 @@ export function authoringPolicies(skillBody: string): {
       if (!skillId) {
         return;
       }
-      const conflicted = ctx.call("update_skill", {
+      const conflicted = ctx.call("manage_skill", {
+        command: "update",
         skillId,
         expectedDraftVersion: 1,
         bundle: VALID_BUNDLE,
         idempotencyKey: "k2",
       });
       if (conflicted.outcome.startsWith("error:")) {
-        ctx.call("update_skill", {
+        ctx.call("manage_skill", {
+          command: "update",
           skillId,
           expectedDraftVersion: detailsOf(conflicted.response)
             .currentDraftVersion,
@@ -216,7 +231,8 @@ export function authoringPolicies(skillBody: string): {
           idempotencyKey: "k3",
         });
       }
-      ctx.call("publish_skill", {
+      ctx.call("manage_skill", {
+        command: "publish",
         skillId,
         expectedDraftVersion: 3,
         idempotencyKey: "k4",
@@ -242,15 +258,16 @@ export function authoringPolicies(skillBody: string): {
       let draftVersion = 0;
 
       for (const step of steps) {
-        if (!available.includes(step)) {
+        if (!available.includes(step.split(":")[0] as string)) {
           continue;
         }
         if (step === "find_skill") {
           ctx.call("find_skill", { query: "sample" });
           continue;
         }
-        if (step === "create_skill") {
-          const created = ctx.call("create_skill", {
+        if (step === "manage_skill:create") {
+          const created = ctx.call("manage_skill", {
+            command: "create",
             audience,
             bundle: VALID_BUNDLE,
             idempotencyKey: "<unique-key>",
@@ -272,11 +289,12 @@ export function authoringPolicies(skillBody: string): {
             draftVersion;
           continue;
         }
-        if (step === "update_skill") {
+        if (step === "manage_skill:update") {
           if (!skillId) {
             continue;
           }
-          const updated = ctx.call("update_skill", {
+          const updated = ctx.call("manage_skill", {
+            command: "update",
             skillId,
             expectedDraftVersion: draftVersion,
             bundle: VALID_BUNDLE,
@@ -290,7 +308,8 @@ export function authoringPolicies(skillBody: string): {
             draftVersion =
               (resultOf(reread.response).draftVersion as number | undefined) ??
               draftVersion;
-            const retried = ctx.call("update_skill", {
+            const retried = ctx.call("manage_skill", {
+              command: "update",
               skillId,
               expectedDraftVersion: draftVersion,
               bundle: VALID_BUNDLE,
@@ -306,11 +325,12 @@ export function authoringPolicies(skillBody: string): {
             draftVersion;
           continue;
         }
-        if (step === "publish_skill") {
-          if (!skillId || !ctx.server.requestApproval("publish_skill")) {
+        if (step === "manage_skill:publish") {
+          if (!skillId || !ctx.server.requestApproval("manage_skill:publish")) {
             continue;
           }
-          ctx.call("publish_skill", {
+          ctx.call("manage_skill", {
+            command: "publish",
             skillId,
             expectedDraftVersion: draftVersion,
             idempotencyKey: "<unique-key>",

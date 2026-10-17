@@ -29,14 +29,7 @@ const DATA_TOOLS = [
   "get_fields",
   "search_contacts",
 ];
-const SKILL_TOOLS = [
-  "find_skill",
-  "list_skills",
-  "get_skill",
-  "create_skill",
-  "update_skill",
-  "publish_skill",
-];
+const SKILL_TOOLS = ["find_skill", "get_skill", "manage_skill"];
 const KNOWN_FIELDS = ["industry", "seniority", "title"];
 
 export interface MockServer {
@@ -55,7 +48,7 @@ function rpc(
 
 export function createMockServer(options: MockServerOptions): MockServer {
   const scenario = options.scenario;
-  const approvals = new Set(options.approvals ?? ["publish_skill"]);
+  const approvals = new Set(options.approvals ?? ["manage_skill:publish"]);
   const principal: Principal =
     scenario === "api-key-principal" ? "api-key" : "member";
   const hasSkillScopes = scenario !== "member-without-skill-scopes";
@@ -156,7 +149,10 @@ export function createMockServer(options: MockServerOptions): MockServer {
         );
       }
 
-      switch (tool) {
+      // manage_skill routes on its command, as Parcel's planner does.
+      const route =
+        tool === "manage_skill" ? `manage_skill:${String(args.command)}` : tool;
+      switch (route) {
         case "workspace_get_info":
           return ok({
             plan: "pro",
@@ -181,9 +177,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         }
         case "find_skill":
           return ok({ matches: [] });
-        case "list_skills":
-          return ok({ skills: [] });
-        case "create_skill": {
+        case "manage_skill:create": {
           const content = bundleContent(args);
           if (!content.startsWith("---\n")) {
             return error("validation", "frontmatter_missing");
@@ -212,7 +206,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
             lifecycle: "draft",
           });
         }
-        case "update_skill": {
+        case "manage_skill:update": {
           if (args.skillId !== issuedSkillId) {
             return error(
               "not_found",
@@ -236,8 +230,8 @@ export function createMockServer(options: MockServerOptions): MockServer {
           draftVersion += 1;
           return ok({ skillId: issuedSkillId, draftVersion, changed: true });
         }
-        case "publish_skill": {
-          if (!hostApproved.has("publish_skill")) {
+        case "manage_skill:publish": {
+          if (!hostApproved.has("manage_skill:publish")) {
             return error(
               "forbidden",
               "approval_required",
