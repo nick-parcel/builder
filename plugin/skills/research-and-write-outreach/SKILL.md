@@ -6,7 +6,7 @@ compatibility: Parcel Spec, or any MCP client connected to Parcel
 metadata:
   parcel:
     schema-version: 1
-    version: 0.3.2
+    version: 0.4.0
     visibility:
       claude-plugin: true
       parcel-explore: true
@@ -25,7 +25,7 @@ Read [the Parcel data notes](reference/parcel-data.md) first.
 ## Workflow
 
 1. Resolve who and what: the account, the project or projects, and the recipient. If no recipient is named, list the named contacts on that account and project with their roles and ask which. Never invent an email address. If the chosen contact has no email in Parcel, draft anyway and say the address is unknown.
-2. Load the workspace's `icp` skill for the sender, tone, proof points, and phrases to avoid. Without it, ask for the sender's name and title and one proof point.
+2. Read the firm's ICP page in knowledge (Go-to-market/ICP) and any knowledge pages about positioning, proof points, and messaging, for the sender, tone, proof points, and phrases to avoid. Without them, ask for the sender's name and title and one proof point.
 3. Research:
    - the account's active and stalled projects that fit the ICP, with stage and disposition;
    - the latest dated signals on those projects, which become the reason to write now;

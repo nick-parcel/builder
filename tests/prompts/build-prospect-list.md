@@ -13,6 +13,6 @@
 
 ## Behavior checks
 
-- Loads the `icp` skill first; without one, asks a single round with recommended answers.
+- Reads the firm's ICP page in knowledge first; without one, asks a single round with recommended answers.
 - Every row has a reason naming a dated signal or a fact, and blanks read "not named in public filings yet".
 - Shows a projects table and an accounts table; no bucket is padded.

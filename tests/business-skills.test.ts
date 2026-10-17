@@ -15,40 +15,39 @@ const CANONICAL_NOTES = path.join(
 const MAX_BUSINESS_SKILL_BYTES = 10 * 1024;
 // Business skills name intents, never tools, so one file reads the same in Spec and over MCP.
 const TOOL_NAME =
-  /\b(query_data|web_search|ask_member|find_skill|get_skill|list_skills|create_skill|update_skill|publish_skill|search_[a-z_]+|get_[a-z_]+|workspace_[a-z_]+)\b/;
+  /\b(query_data|web_search|ask_member|find_skill|get_skill|manage_skill|list_skills|create_skill|update_skill|publish_skill|find_knowledge|get_knowledge|manage_knowledge|search_[a-z_]+|get_[a-z_]+|workspace_[a-z_]+)\b/;
 
 // Phrases each skill must keep; they carry the behavior the design settled.
 const CONTRACTS: Record<string, readonly string[]> = {
   "build-icp": [
-    "named `icp`",
-    "workspace skill",
+    "the icp page (go-to-market/icp)",
+    "the workspace's knowledge",
     "batches of up to 100",
-    "approves publishing",
     "say so before asking anything",
-    "publish it from the draft card",
-    "the name `icp` is already taken",
+    "edit only the sections that changed",
+    "read the page back after saving",
   ],
   "build-prospect-list": [
-    "load the workspace's `icp` skill",
+    "read the firm's icp page in knowledge",
     "priority:",
     "secondary:",
     "watch:",
     "not named in public filings yet",
   ],
   "project-brief": [
-    "load the workspace's `icp` skill",
+    "read the firm's icp page in knowledge",
     "unknowns",
     "date every web fact",
     "go or no-go",
   ],
   "research-and-write-outreach": [
-    "load the workspace's `icp` skill",
+    "read the firm's icp page in knowledge",
     "never send",
     "never invent an email address",
     "150 words or fewer",
   ],
   "create-crm-opportunity": [
-    "load the workspace's `icp` skill",
+    "crm defaults section of the firm's icp page in knowledge",
     "never pick the account yourself",
     "one opportunity per project",
     "search before you create",

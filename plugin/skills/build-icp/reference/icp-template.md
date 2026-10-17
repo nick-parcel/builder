@@ -1,11 +1,8 @@
 # ICP profile template
 
-Write the workspace's `icp` skill in exactly this shape. Keep the headings and their order: the other Parcel skills read them by name. Fill every section from the evidence and the interview; write "Not set" rather than deleting a section.
+This is the body of the knowledge page Go-to-market/ICP.
 
-    ---
-    name: icp
-    description: This workspace's ideal customer profile (ICP), loaded by the Parcel business skills before they build prospect lists, briefs, outreach, or CRM opportunities. Use when someone asks what our ICP is, who we target, or which projects fit us.
-    ---
+Write the page in exactly this shape. Keep the headings and their order: the other Parcel skills read them by name. Fill every section from the evidence and the interview; write "Not set" rather than deleting a section.
 
     # Our ICP
 
