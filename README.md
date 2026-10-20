@@ -23,7 +23,7 @@ Verify the install:
 claude plugin list
 ```
 
-`builder@builder` should appear as enabled, with seven skills and one MCP
+`builder@builder` should appear as enabled, with two skills and one MCP
 server.
 
 To develop against a checked-out copy of this repository, add the marketplace
@@ -67,6 +67,9 @@ an authorization error, reconnect through your client's own MCP settings.
 | `/builder:using-parcel-mcp` | Connect to Parcel, discover which tools and scope groups the grant carries, search Parcel data, read or update workspace records, and explain a refusal honestly. |
 | `/builder:create-skill` | Author, test, revise, and publish a Parcel skill through Parcel's MCP skill tools, including description triggering, the Personal or Workspace audience choice, and revision conflicts. |
 
+Business skills for prospecting, briefs, outreach, and CRM were retired in
+0.5.0 and will return rebuilt on Parcel knowledge.
+
 ### `/builder:using-parcel-mcp`
 
 Picks up when you ask what tools you have, want Parcel data searched, want a
@@ -91,9 +94,6 @@ conflict by re-reading the draft instead of overwriting someone else's edit.
 ```
 /builder:create-skill draft a workspace skill for weekly account reviews
 ```
-
-Business skills for prospecting, briefs, outreach, and CRM were retired in
-0.5.0 and will return rebuilt on Parcel knowledge.
 
 ## Other AI clients
 
