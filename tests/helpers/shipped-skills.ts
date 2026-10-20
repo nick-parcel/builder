@@ -1,18 +1,12 @@
-// The skills plugin/skills ships, split by visibility profile; later tasks append business slugs.
-export const PLUGIN_VERSION = "0.4.0";
+// The skills plugin/skills ships, split by visibility profile; business skills return rebuilt on knowledge.
+export const PLUGIN_VERSION = "0.5.0";
 
 export const EXTERNAL_ONLY_SKILLS: readonly string[] = [
   "create-skill",
   "using-parcel-mcp",
 ];
 
-export const BUSINESS_SKILLS: string[] = [
-  "build-icp",
-  "build-prospect-list",
-  "project-brief",
-  "research-and-write-outreach",
-  "create-crm-opportunity",
-];
+export const BUSINESS_SKILLS: string[] = [];
 
 export const SHIPPED_SKILLS: readonly string[] = [
   ...EXTERNAL_ONLY_SKILLS,
