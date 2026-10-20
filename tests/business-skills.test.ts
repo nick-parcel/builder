@@ -2,110 +2,30 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { readSkill, validateSkillDir } from "../scripts/read-skill.js";
-import { BUSINESS_SKILLS } from "./helpers/shipped-skills.js";
+import { BUSINESS_SKILLS, SHIPPED_SKILLS } from "./helpers/shipped-skills.js";
 
 const skillsRoot = path.join(__dirname, "..", "plugin", "skills");
 const promptsRoot = path.join(__dirname, "prompts");
-const CANONICAL_NOTES = path.join(
-  skillsRoot,
-  "build-icp",
-  "reference",
-  "parcel-data.md",
-);
 const MAX_BUSINESS_SKILL_BYTES = 10 * 1024;
 // Business skills name intents, never tools, so one file reads the same in Spec and over MCP.
 const TOOL_NAME =
   /\b(query_data|web_search|ask_member|find_skill|get_skill|manage_skill|list_skills|create_skill|update_skill|publish_skill|find_knowledge|get_knowledge|manage_knowledge|search_[a-z_]+|get_[a-z_]+|workspace_[a-z_]+)\b/;
 
-// Phrases each skill must keep; they carry the behavior the design settled.
-const CONTRACTS: Record<string, readonly string[]> = {
-  "build-icp": [
-    "the icp page (go-to-market/icp)",
-    "the icp page in the workspace's knowledge (go-to-market/icp)",
-    "batches of up to 100",
-    "say so before asking anything",
-    "edit only the sections that changed",
-    "read the page back after saving",
-  ],
-  "build-prospect-list": [
-    "read the firm's icp page in knowledge",
-    "priority:",
-    "secondary:",
-    "watch:",
-    "not named in public filings yet",
-  ],
-  "project-brief": [
-    "read the firm's icp page in knowledge",
-    "unknowns",
-    "date every web fact",
-    "go or no-go",
-  ],
-  "research-and-write-outreach": [
-    "read the firm's icp page in knowledge",
-    "never send",
-    "never invent an email address",
-    "150 words or fewer",
-  ],
-  "create-crm-opportunity": [
-    "crm defaults section of the firm's icp page in knowledge",
-    "never pick the account yourself",
-    "one opportunity per project",
-    "search before you create",
-    "`in-crm`",
-    "never put construction cost in the amount",
-  ],
-};
+// Phrases each skill must keep; a rebuilt business skill adds its entry here.
+const CONTRACTS: Record<string, readonly string[]> = {};
 
-describe("shared data notes", () => {
-  it("teaches append-only notes and tags, and waiting for a yes", async () => {
-    const notes = await fs.readFile(CANONICAL_NOTES, "utf8");
-    expect(notes).toContain("read the record's current notes and tags first");
-    expect(notes).toContain(
-      "Never send a note or tag list that drops what was already there.",
-    );
-    expect(notes).toContain("Wait for the member's yes before every write.");
-  });
-
-  it("counts stalled projects as prospects, ranked behind active ones", async () => {
-    // Stalled is derived from filing silence alone, and most stalled projects are approved or under review.
-    const notes = await fs.readFile(CANONICAL_NOTES, "utf8");
-    expect(notes).toContain("Active and stalled projects are prospects.");
-    expect(notes).toContain("Rank active ahead of stalled");
-    expect(notes).toContain(
-      "Denied, withdrawn, expired, and cancelled projects are not prospects.",
-    );
-    expect(notes).not.toContain("Only active projects are prospects.");
+describe("business skills", () => {
+  it("ships none until they are rebuilt on knowledge", async () => {
+    expect(BUSINESS_SKILLS).toEqual([]);
+    const dirs = (await fs.readdir(skillsRoot, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    expect(dirs).toEqual([...SHIPPED_SKILLS]);
   });
 });
 
-describe("build-icp template", () => {
-  const template = path.join(
-    skillsRoot,
-    "build-icp",
-    "reference",
-    "icp-template.md",
-  );
-
-  it("keeps the headings the other skills read by name", async () => {
-    const body = await fs.readFile(template, "utf8");
-    for (const heading of [
-      "## Who we are",
-      "## Target accounts",
-      "## Target projects",
-      "## Priority buckets",
-      "## Why-now signals",
-      "## Outreach voice",
-      "## CRM defaults",
-    ]) {
-      expect(body).toContain(heading);
-    }
-  });
-
-  it("names intents, not tool names", async () => {
-    expect(await fs.readFile(template, "utf8")).not.toMatch(TOOL_NAME);
-  });
-});
-
+// Runs nothing while BUSINESS_SKILLS is empty; every rebuilt skill must pass it.
 describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
   const dir = path.join(skillsRoot, slug);
   const read = (file: string) => fs.readFile(path.join(dir, file), "utf8");
@@ -119,21 +39,8 @@ describe.each(BUSINESS_SKILLS)("%s business skill", (slug) => {
     expect(stat.size).toBeLessThanOrEqual(MAX_BUSINESS_SKILL_BYTES);
   });
 
-  it("carries the shared data notes byte for byte and links them", async () => {
-    expect(await read("reference/parcel-data.md")).toBe(
-      await fs.readFile(CANONICAL_NOTES, "utf8"),
-    );
-    expect(await read("SKILL.md")).toContain("](reference/parcel-data.md)");
-  });
-
   it("names intents, not tool names", async () => {
-    for (const file of ["SKILL.md", "reference/parcel-data.md"]) {
-      expect(await read(file)).not.toMatch(TOOL_NAME);
-    }
-  });
-
-  it("does not narrow prospects to active projects", async () => {
-    expect(await read("SKILL.md")).not.toMatch(/\bactive projects\b/i);
+    expect(await read("SKILL.md")).not.toMatch(TOOL_NAME);
   });
 
   it("uses the product's vocabulary", async () => {

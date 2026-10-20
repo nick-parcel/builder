@@ -6,7 +6,7 @@ compatibility: Any MCP client that can connect to a remote HTTP MCP server and c
 metadata:
   parcel:
     schema-version: 1
-    version: 0.4.0
+    version: 0.5.0
     visibility:
       claude-plugin: true
       parcel-explore: false
@@ -56,7 +56,7 @@ Global reads spend the workspace's credits, so say what a broad search will cost
 ## Skills and knowledge
 
 - Skills are three tools: `find_skill` (a phrase is a ranked search; filters list skills), `get_skill` (one skill, or one file inside it with `path`), and `manage_skill` (create, update, publish, unpublish, delete, transfer, move, fork, install, or uninstall, chosen by `command`). For authoring a skill, use `/builder:create-skill`.
-- Knowledge is the workspace's own pages about the firm, such as its ICP, positioning, and proof points. `find_knowledge` takes 1 to 4 phrasings, or none for the page tree; `get_knowledge` reads a page, a section, or an attached file; `manage_knowledge` creates a page, edits by `str_replace`, inserts after a heading, replaces, moves, deletes (archives), or restores. Edits need the page's current revision, so read the page before changing it.
+- Knowledge is the workspace's own pages about the firm, such as who it targets, positioning, and proof points. `find_knowledge` takes 1 to 4 phrasings, or none for the page tree; `get_knowledge` reads a page, a section, or an attached file; `manage_knowledge` creates a page, edits by `str_replace`, inserts after a heading, replaces, moves, deletes (archives), or restores. Edits need the page's current revision, so read the page before changing it.
 
 ## Approvals
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-20
+
+### Removed
+
+- The business skills build-icp, build-prospect-list, create-crm-opportunity, project-brief, and research-and-write-outreach. They were written before Parcel knowledge existed and assumed a single ICP page; they will be rebuilt on knowledge. create-skill and using-parcel-mcp remain.
+
 ## [0.4.0] - 2026-10-17
 
 ### Changed
